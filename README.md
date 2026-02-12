@@ -8,9 +8,7 @@
 
 Instead of wrestling with diagramming tools or manually crafting image generation prompts, describe your system in plain English and let Diagram Forge handle the rest — template selection, prompt engineering, style application, and cost tracking.
 
-<!-- TODO: Add sample output image
-![Example architecture diagram](docs/examples/sample-architecture.png)
--->
+![Example: Enterprise architecture diagram generated with Diagram Forge](docs/examples/sample-architecture.png)
 
 ## Features
 
