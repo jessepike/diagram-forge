@@ -1,0 +1,19 @@
+version: 1
+default_provider: gemini
+output_directory: ~/.diagram-forge/output
+styles_directory: ~/.diagram-forge/styles
+database_path: ~/.diagram-forge/usage.db
+
+providers:
+  gemini:
+    enabled: true
+    model: gemini-2.0-flash-preview-image-generation
+    api_key_env: GEMINI_API_KEY
+  openai:
+    enabled: true
+    model: gpt-image-1
+    api_key_env: OPENAI_API_KEY
+  replicate:
+    enabled: true
+    model: black-forest-labs/flux-schnell
+    api_key_env: REPLICATE_API_TOKEN

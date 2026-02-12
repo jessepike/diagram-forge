@@ -1,0 +1,57 @@
+name: sequence
+display_name: "Sequence Diagram"
+description: "UML sequence diagram showing interactions over time"
+version: "1.0"
+supports:
+  - sequence
+  - interaction
+  - protocol
+
+style_defaults:
+  background: "white"
+  font: "monospace"
+  corners: "square"
+  borders: "black"
+  aspect_ratio: "9:16"
+
+color_system:
+  description: "Colors indicate participant types"
+  palette:
+    user: "light blue"
+    frontend: "light green"
+    backend: "light purple"
+    database: "light orange"
+    external: "light gray"
+
+prompt_template: |
+  Create a UML sequence diagram showing interactions over time.
+  {style_defaults_block}
+
+  COLOR SYSTEM:
+  {color_system_block}
+
+  TITLE: {title}
+
+  PARTICIPANTS (left to right):
+  {participants_block}
+
+  INTERACTIONS (in chronological order):
+  {interactions_block}
+
+  NOTES:
+  {notes_block}
+
+  LEGEND (bottom):
+  {legend_block}
+
+  Use standard UML notation: solid arrows for synchronous calls, dashed for responses.
+  Show activation boxes on lifelines. Number interactions sequentially.
+  All text crystal clear and perfectly legible. Enterprise presentation quality.
+  {aspect_ratio} aspect ratio. {resolution} resolution.
+
+variables:
+  title: "Required. Sequence diagram title."
+  participants_block: "Required. Participant definitions with types."
+  interactions_block: "Required. Ordered list of interactions between participants."
+  notes_block: "Optional. Additional notes or annotations."
+  legend_block: "Optional. Auto-generated from color_system if not provided."

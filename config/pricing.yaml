@@ -1,0 +1,28 @@
+# Provider pricing rates — update as pricing changes
+# Last updated: 2026-02-11
+
+providers:
+  gemini:
+    model: gemini-2.0-flash-preview-image-generation
+    billing_model: per_image
+    cost_per_image: 0.039
+    notes: "Gemini image generation pricing"
+
+  openai:
+    model: gpt-image-1
+    billing_model: per_image
+    costs:
+      1024x1024:
+        standard: 0.011
+        hd: 0.022
+      1536x1024:
+        standard: 0.016
+        hd: 0.032
+    notes: "OpenAI GPT Image 1 pricing varies by size and quality"
+
+  replicate:
+    model: black-forest-labs/flux-schnell
+    billing_model: per_second
+    cost_per_second: 0.003
+    typical_generation_seconds: 2
+    notes: "Replicate charges per second of GPU time"

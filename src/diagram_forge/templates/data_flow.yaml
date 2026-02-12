@@ -1,0 +1,52 @@
+name: data_flow
+display_name: "Data Flow Diagram"
+description: "Swim lane data flow diagram showing data movement between systems"
+version: "1.0"
+supports:
+  - data_flow
+  - etl
+  - pipeline
+
+style_defaults:
+  background: "white"
+  font: "sans-serif"
+  corners: "rounded"
+  borders: "dark gray"
+  aspect_ratio: "16:9"
+
+color_system:
+  description: "Colors indicate data flow stages"
+  palette:
+    source: "light blue"
+    transform: "light yellow"
+    destination: "light green"
+    error_handling: "light red"
+    monitoring: "light gray"
+
+prompt_template: |
+  Create a professional data flow diagram with swim lanes.
+  {style_defaults_block}
+
+  COLOR SYSTEM:
+  {color_system_block}
+
+  TITLE: {title}
+
+  SWIM LANES:
+  {swim_lanes_block}
+
+  DATA FLOWS (use arrows to show direction):
+  {flows_block}
+
+  LEGEND (bottom):
+  {legend_block}
+
+  Use clear directional arrows for data flow. Label all connections with data type/format.
+  All text crystal clear and perfectly legible. Enterprise presentation quality.
+  {aspect_ratio} aspect ratio. {resolution} resolution.
+
+variables:
+  title: "Required. Diagram title."
+  swim_lanes_block: "Required. Swim lane definitions with systems/processes."
+  flows_block: "Required. Data flow definitions with source, destination, and data description."
+  legend_block: "Optional. Auto-generated from color_system if not provided."

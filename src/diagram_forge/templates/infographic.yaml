@@ -1,0 +1,53 @@
+name: infographic
+display_name: "Infographic / Learning Card"
+description: "Visual infographic or learning card for explaining concepts"
+version: "1.0"
+supports:
+  - infographic
+  - learning
+  - overview
+
+style_defaults:
+  background: "white"
+  font: "sans-serif"
+  corners: "rounded"
+  borders: "none"
+  aspect_ratio: "1:1"
+
+color_system:
+  description: "Colors create visual hierarchy and grouping"
+  palette:
+    primary: "blue"
+    secondary: "purple"
+    accent: "orange"
+    neutral: "gray"
+    highlight: "green"
+
+prompt_template: |
+  Create a visually engaging infographic / learning card.
+  {style_defaults_block}
+
+  COLOR SYSTEM:
+  {color_system_block}
+
+  TITLE: {title}
+
+  KEY POINTS:
+  {key_points_block}
+
+  VISUAL ELEMENTS:
+  {visual_elements_block}
+
+  CALL TO ACTION / SUMMARY:
+  {summary_block}
+
+  Use icons, visual metaphors, and clear visual hierarchy.
+  Balance text with graphics. Make it scannable and memorable.
+  All text crystal clear and perfectly legible. Modern, clean design.
+  {aspect_ratio} aspect ratio. {resolution} resolution.
+
+variables:
+  title: "Required. Infographic title."
+  key_points_block: "Required. Main points to communicate."
+  visual_elements_block: "Optional. Specific visual elements to include (icons, charts, etc)."
+  summary_block: "Optional. Bottom summary or call to action."

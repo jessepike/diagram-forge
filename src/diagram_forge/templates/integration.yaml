@@ -1,0 +1,57 @@
+name: integration
+display_name: "Integration / Connection Map"
+description: "System integration map showing connections, protocols, and data exchange"
+version: "1.0"
+supports:
+  - integration
+  - network
+  - connectivity
+
+style_defaults:
+  background: "white"
+  font: "sans-serif"
+  corners: "rounded"
+  borders: "dark gray"
+  aspect_ratio: "16:9"
+
+color_system:
+  description: "Colors indicate system domains"
+  palette:
+    internal: "light blue"
+    partner: "light purple"
+    cloud: "light orange"
+    on_premise: "light green"
+    saas: "light yellow"
+
+prompt_template: |
+  Create a system integration map showing all connections.
+  {style_defaults_block}
+
+  COLOR SYSTEM:
+  {color_system_block}
+
+  TITLE: {title}
+
+  SYSTEMS:
+  {systems_block}
+
+  INTEGRATIONS (connections between systems):
+  {integrations_block}
+
+  PROTOCOLS & DATA FORMATS:
+  {protocols_block}
+
+  LEGEND (bottom):
+  {legend_block}
+
+  Use line styles to indicate protocol types (solid=REST, dashed=async, dotted=batch).
+  Label all connections with protocol, format, and frequency.
+  All text crystal clear and perfectly legible. Enterprise presentation quality.
+  {aspect_ratio} aspect ratio. {resolution} resolution.
+
+variables:
+  title: "Required. Integration map title."
+  systems_block: "Required. System definitions with domains."
+  integrations_block: "Required. Integration definitions between systems."
+  protocols_block: "Optional. Protocol and data format details."
+  legend_block: "Optional. Auto-generated from color_system if not provided."

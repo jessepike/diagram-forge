@@ -1,0 +1,52 @@
+name: architecture
+display_name: "Enterprise Architecture (TOGAF)"
+description: "Layered TOGAF-style architecture diagram with color-coded components"
+version: "1.0"
+supports:
+  - architecture
+  - system_design
+  - togaf
+
+style_defaults:
+  background: "white"
+  font: "sans-serif"
+  corners: "slightly rounded"
+  borders: "black"
+  aspect_ratio: "16:9"
+
+color_system:
+  description: "Colors encode layer meaning, not decoration"
+  palette:
+    business: "light purple"
+    application: "light blue"
+    technology: "light orange"
+    integration: "light gray"
+    data: "light green"
+
+prompt_template: |
+  Create an enterprise-grade architecture diagram in TOGAF style.
+  {style_defaults_block}
+
+  COLOR SYSTEM:
+  {color_system_block}
+
+  TITLE: {title}
+
+  LAYERS (top to bottom):
+  {layers_block}
+
+  CONNECTIONS:
+  {connections_block}
+
+  LEGEND (bottom):
+  {legend_block}
+
+  All text crystal clear and perfectly legible. Enterprise presentation quality.
+  Professional, clean design with clear visual hierarchy.
+  {aspect_ratio} aspect ratio. {resolution} resolution.
+
+variables:
+  title: "Required. Diagram title."
+  layers_block: "Required. Layer definitions with components."
+  connections_block: "Required. Connection definitions between components."
+  legend_block: "Optional. Auto-generated from color_system if not provided."

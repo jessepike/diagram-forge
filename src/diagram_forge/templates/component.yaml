@@ -1,0 +1,56 @@
+name: component
+display_name: "Component Detail View"
+description: "Detailed component diagram showing internal structure and interfaces"
+version: "1.0"
+supports:
+  - component
+  - module
+  - service
+
+style_defaults:
+  background: "white"
+  font: "sans-serif"
+  corners: "rounded"
+  borders: "dark blue"
+  aspect_ratio: "16:9"
+
+color_system:
+  description: "Colors indicate component types"
+  palette:
+    api: "light blue"
+    service: "light purple"
+    database: "light green"
+    cache: "light yellow"
+    external: "light gray"
+
+prompt_template: |
+  Create a detailed component diagram showing internal structure.
+  {style_defaults_block}
+
+  COLOR SYSTEM:
+  {color_system_block}
+
+  COMPONENT: {title}
+
+  INTERFACES (exposed APIs/ports):
+  {interfaces_block}
+
+  INTERNAL MODULES:
+  {modules_block}
+
+  DEPENDENCIES (external services/databases):
+  {dependencies_block}
+
+  LEGEND (bottom):
+  {legend_block}
+
+  Show clear boundaries between internal and external. Use lollipop notation for interfaces.
+  All text crystal clear and perfectly legible. Enterprise presentation quality.
+  {aspect_ratio} aspect ratio. {resolution} resolution.
+
+variables:
+  title: "Required. Component name."
+  interfaces_block: "Required. External interfaces and APIs exposed."
+  modules_block: "Required. Internal modules and their relationships."
+  dependencies_block: "Required. External dependencies and connections."
+  legend_block: "Optional. Auto-generated from color_system if not provided."

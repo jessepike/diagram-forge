@@ -1,0 +1,7 @@
+{
+  "name": "diagram-forge",
+  "version": "0.1.0",
+  "description": "AI-powered architecture diagram generation — create enterprise-grade diagrams from natural language using Gemini, OpenAI, or Replicate",
+  "author": "Jesse Pike",
+  "license": "MIT"
+}

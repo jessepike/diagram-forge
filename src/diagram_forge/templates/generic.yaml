@@ -1,0 +1,28 @@
+name: generic
+display_name: "Custom / Freeform"
+description: "Generic diagram template for custom or freeform diagram types"
+version: "1.0"
+supports:
+  - generic
+  - custom
+  - freeform
+
+style_defaults:
+  background: "white"
+  font: "sans-serif"
+  corners: "slightly rounded"
+  borders: "dark gray"
+  aspect_ratio: "16:9"
+
+prompt_template: |
+  Create a professional, enterprise-grade diagram.
+  {style_defaults_block}
+
+  {content}
+
+  All text crystal clear and perfectly legible. Enterprise presentation quality.
+  Professional, clean design with clear visual hierarchy and appropriate use of color.
+  {aspect_ratio} aspect ratio. {resolution} resolution.
+
+variables:
+  content: "Required. Full description of what to diagram."
