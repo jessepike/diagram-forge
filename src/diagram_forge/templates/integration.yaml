@@ -1,7 +1,7 @@
 name: integration
 display_name: "Integration / Connection Map"
-description: "System integration map showing connections, protocols, and data exchange"
-version: "1.0"
+description: "System integration map showing connections, protocols, and data exchange between systems"
+version: "2.0"
 supports:
   - integration
   - network
@@ -9,23 +9,33 @@ supports:
 
 style_defaults:
   background: "white"
-  font: "sans-serif"
+  font: "bold sans-serif"
   corners: "rounded"
-  borders: "dark gray"
+  borders: "dark gray (#555555)"
   aspect_ratio: "16:9"
 
 color_system:
-  description: "Colors indicate system domains"
+  description: "Colors encode system domains and ownership boundaries"
   palette:
-    internal: "light blue"
-    partner: "light purple"
-    cloud: "light orange"
-    on_premise: "light green"
-    saas: "light yellow"
+    internal: "#AED6F1 (light blue, border #5DADE2)"
+    external: "#D5D8DC (light gray, border #ABB2B9)"
+    partner: "#FDEBD0 (light orange, border #F0B27A)"
+    data_store: "#A9DFBF (light green, border #58D68D)"
+    middleware: "#F5B7B1 (light red, border #EC7063)"
 
 prompt_template: |
-  Create a system integration map showing all connections.
-  {style_defaults_block}
+  Create a system integration map showing connections between systems.
+
+  CRITICAL RENDERING INSTRUCTIONS:
+  - Flat 2D technical diagram — NO shadows, NO gradients, NO 3D effects
+  - All text must be LARGE, bold, sans-serif — title 24pt, system labels 18pt, protocol labels 12pt
+  - Each system is a rounded-corner rectangle with name and subtitle
+  - Connections are labeled arrows showing protocol/data format
+  - Domain boundaries shown as dashed rectangles grouping related systems
+  - Generous whitespace between systems
+  - All arrows dark gray (#555555) with clear arrowheads
+  - Line styles indicate protocol: solid=REST/sync, dashed=async/events, dotted=batch
+  - {style_defaults_block}
 
   COLOR SYSTEM:
   {color_system_block}
@@ -38,15 +48,21 @@ prompt_template: |
   INTEGRATIONS (connections between systems):
   {integrations_block}
 
-  PROTOCOLS & DATA FORMATS:
+  PROTOCOLS AND DATA FORMATS:
   {protocols_block}
 
-  LEGEND (bottom):
+  LEGEND (bottom-right):
   {legend_block}
 
-  Use line styles to indicate protocol types (solid=REST, dashed=async, dotted=batch).
-  Label all connections with protocol, format, and frequency.
-  All text crystal clear and perfectly legible. Enterprise presentation quality.
+  LAYOUT RULES:
+  - Group systems by domain within dashed boundary boxes
+  - Internal systems in the center, external on the periphery
+  - Middleware/integration layers between internal and external
+  - Label all connections with protocol, format, and frequency
+  - Bidirectional connections shown with double-headed arrows
+  - All text horizontal and readable
+
+  All text crystal clear and perfectly legible. Clean technical diagram.
   {aspect_ratio} aspect ratio. {resolution} resolution.
 
 variables:

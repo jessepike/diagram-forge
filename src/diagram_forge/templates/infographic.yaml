@@ -1,7 +1,7 @@
 name: infographic
 display_name: "Infographic / Learning Card"
-description: "Visual infographic or learning card for explaining concepts"
-version: "1.0"
+description: "Visual infographic or learning card for explaining concepts with icons and visual hierarchy"
+version: "2.0"
 supports:
   - infographic
   - learning
@@ -9,7 +9,7 @@ supports:
 
 style_defaults:
   background: "white"
-  font: "sans-serif"
+  font: "bold sans-serif"
   corners: "rounded"
   borders: "none"
   aspect_ratio: "1:1"
@@ -17,22 +17,31 @@ style_defaults:
 color_system:
   description: "Colors create visual hierarchy and grouping"
   palette:
-    primary: "blue"
-    secondary: "purple"
-    accent: "orange"
-    neutral: "gray"
-    highlight: "green"
+    primary: "#4285F4 (Google Blue)"
+    secondary: "#7B1FA2 (purple)"
+    accent: "#F57C00 (orange)"
+    neutral: "#9E9E9E (gray)"
+    highlight: "#43A047 (green)"
+    background_sections: "#F5F5F5 (light gray for section backgrounds)"
 
 prompt_template: |
   Create a visually engaging infographic / learning card.
-  {style_defaults_block}
+
+  CRITICAL RENDERING INSTRUCTIONS:
+  - Modern, clean design with clear visual hierarchy
+  - All text must be LARGE and bold — title 28pt, headings 20pt, body 14pt
+  - Use generous whitespace and padding
+  - Include simple line-art ICONS next to key points
+  - Use colored section backgrounds to group related information
+  - NO 3D effects or shadows — flat design only
+  - {style_defaults_block}
 
   COLOR SYSTEM:
   {color_system_block}
 
   TITLE: {title}
 
-  KEY POINTS:
+  KEY POINTS (display with icons and visual emphasis):
   {key_points_block}
 
   VISUAL ELEMENTS:
@@ -41,9 +50,16 @@ prompt_template: |
   CALL TO ACTION / SUMMARY:
   {summary_block}
 
-  Use icons, visual metaphors, and clear visual hierarchy.
-  Balance text with graphics. Make it scannable and memorable.
+  LAYOUT RULES:
+  - Title at top, large and bold
+  - Key points arranged in a scannable grid or vertical list
+  - Each point has an icon + text pair
+  - Use color blocks to separate sections
+  - Summary/CTA at the bottom
+  - Balance text with whitespace — avoid visual clutter
+
   All text crystal clear and perfectly legible. Modern, clean design.
+  Make it scannable and memorable.
   {aspect_ratio} aspect ratio. {resolution} resolution.
 
 variables:

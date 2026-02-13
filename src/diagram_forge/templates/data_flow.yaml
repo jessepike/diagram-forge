@@ -1,7 +1,7 @@
 name: data_flow
-display_name: "Data Flow Diagram"
-description: "Swim lane data flow diagram showing data movement between systems"
-version: "1.0"
+display_name: "Data Flow / Pipeline Diagram"
+description: "Left-to-right pipeline flow diagram showing data movement between stages"
+version: "2.0"
 supports:
   - data_flow
   - etl
@@ -9,44 +9,64 @@ supports:
 
 style_defaults:
   background: "white"
-  font: "sans-serif"
+  font: "bold sans-serif"
   corners: "rounded"
-  borders: "dark gray"
+  borders: "dark gray (#555555)"
   aspect_ratio: "16:9"
 
 color_system:
-  description: "Colors indicate data flow stages"
+  description: "Colors indicate pipeline stage type"
   palette:
-    source: "light blue"
-    transform: "light yellow"
-    destination: "light green"
-    error_handling: "light red"
-    monitoring: "light gray"
+    source: "#D0E0F0 (light blue, border #6FA8DC)"
+    processing: "#D9EAD3 (light green, border #6AA84F)"
+    transformation: "#FFF2CC (light yellow, border #F1C232)"
+    validation: "#F4CCCC (light red, border #E06666)"
+    storage: "#D5D8DC (light gray, border #ABB2B9)"
+    output: "#D0E0F0 (light blue, border #6FA8DC)"
 
 prompt_template: |
-  Create a professional data flow diagram with swim lanes.
-  {style_defaults_block}
+  Create a professional data flow pipeline diagram.
 
-  COLOR SYSTEM:
+  CRITICAL RENDERING INSTRUCTIONS:
+  - Flat 2D — NO shadows, NO gradients, NO 3D effects
+  - All text must be LARGE and bold — title 24pt, step labels 18pt, subtitles 12pt
+  - Each step box is a rounded rectangle, minimum 140px wide and 70px tall
+  - Steps connect left-to-right with THICK arrows (3px+) with large arrowheads
+  - Arrow labels 12pt, positioned above or below the arrow (not overlapping)
+  - Use generous horizontal spacing between steps
+  - {style_defaults_block}
+
+  COLOR SYSTEM (each step colored by its role):
   {color_system_block}
+
+  Each step box has TWO lines of text:
+  - Line 1: Bold label (step name)
+  - Line 2: Smaller subtitle (technology or description)
 
   TITLE: {title}
 
-  SWIM LANES:
-  {swim_lanes_block}
+  PIPELINE STAGES (left to right):
+  {stages_block}
 
-  DATA FLOWS (use arrows to show direction):
-  {flows_block}
+  FEEDBACK LOOPS / BRANCHES (if any):
+  {branches_block}
 
-  LEGEND (bottom):
+  LEGEND (bottom-right):
   {legend_block}
 
-  Use clear directional arrows for data flow. Label all connections with data type/format.
-  All text crystal clear and perfectly legible. Enterprise presentation quality.
+  LAYOUT RULES:
+  - Main pipeline flows LEFT to RIGHT in a single horizontal row
+  - Feedback loops shown as dashed arrows curving below the pipeline
+  - Branch paths shown above or below the main flow
+  - All text horizontal and readable — never rotated
+  - Consistent box sizes within the pipeline
+  - Auxiliary components (error handling, monitoring) placed below the main flow
+
+  All text crystal clear and perfectly legible. Clean technical diagram.
   {aspect_ratio} aspect ratio. {resolution} resolution.
 
 variables:
   title: "Required. Diagram title."
-  swim_lanes_block: "Required. Swim lane definitions with systems/processes."
-  flows_block: "Required. Data flow definitions with source, destination, and data description."
+  stages_block: "Required. Pipeline stage definitions with name, subtitle, and color."
+  branches_block: "Optional. Feedback loops or branch paths."
   legend_block: "Optional. Auto-generated from color_system if not provided."

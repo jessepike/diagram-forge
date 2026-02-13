@@ -23,6 +23,8 @@ class DiagramType(str, Enum):
     SEQUENCE = "sequence"
     INTEGRATION = "integration"
     INFOGRAPHIC = "infographic"
+    C4_CONTAINER = "c4_container"
+    EXEC_INFOGRAPHIC = "exec_infographic"
     GENERIC = "generic"
 
 
@@ -180,6 +182,8 @@ class DiagramTemplate(BaseModel):
     supports: list[str] = Field(default_factory=list)
     style_defaults: TemplateStyleDefaults = Field(default_factory=TemplateStyleDefaults)
     color_system: TemplateColorSystem | None = None
+    recommended_provider: str | None = None
+    recommended_model: str | None = None
     prompt_template: str
     variables: dict[str, str] = Field(default_factory=dict)
 

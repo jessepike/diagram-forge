@@ -7,11 +7,11 @@ database_path: ~/.diagram-forge/usage.db
 providers:
   gemini:
     enabled: true
-    model: gemini-2.0-flash-preview-image-generation
+    model: gemini-3-pro-image-preview
     api_key_env: GEMINI_API_KEY
   openai:
     enabled: true
-    model: gpt-image-1
+    model: gpt-image-1.5
     api_key_env: OPENAI_API_KEY
   replicate:
     enabled: true

@@ -21,7 +21,7 @@ from diagram_forge.models import (
 )
 from diagram_forge.providers import PROVIDER_MAP, get_provider
 from diagram_forge.style_manager import StyleManager
-from diagram_forge.template_engine import build_prompt, load_all_templates
+from diagram_forge.template_engine import build_prompt, load_all_templates, load_template
 
 
 def _serialize(value: Any) -> Any:
@@ -102,7 +102,8 @@ def create_server(config_path: str | None = None) -> Any:
     async def generate_diagram(
         prompt: str,
         diagram_type: str = "generic",
-        provider: str = "gemini",
+        provider: str = "auto",
+        model: str | None = None,
         resolution: str = "2K",
         aspect_ratio: str = "16:9",
         style_reference: str | None = None,
@@ -113,8 +114,9 @@ def create_server(config_path: str | None = None) -> Any:
 
         Args:
             prompt: Description of what to generate
-            diagram_type: Type of diagram (architecture|data_flow|component|sequence|integration|infographic|generic)
-            provider: Image generation provider (gemini|openai|replicate)
+            diagram_type: Type of diagram (architecture|data_flow|component|sequence|integration|infographic|c4_container|exec_infographic|generic)
+            provider: Image generation provider (auto|gemini|openai|replicate). "auto" picks the best provider for the diagram type.
+            model: Override the default model for this provider (e.g. gpt-image-1.5, gemini-3-pro-image-preview)
             resolution: Output resolution (1K|2K|4K)
             aspect_ratio: Output aspect ratio (16:9|1:1|9:16|4:3)
             style_reference: Style name or path to reference image
@@ -122,6 +124,16 @@ def create_server(config_path: str | None = None) -> Any:
             temperature: Generation creativity (0.0 to 2.0)
         """
         start = time.monotonic()
+
+        # Auto-select provider from template recommendation
+        if provider == "auto":
+            try:
+                tmpl = load_template(diagram_type)
+                provider = tmpl.recommended_provider or config.default_provider.value
+                if not model and tmpl.recommended_model:
+                    model = tmpl.recommended_model
+            except FileNotFoundError:
+                provider = config.default_provider.value
 
         # Resolve provider
         provider_config = config.providers.get(provider)
@@ -159,7 +171,8 @@ def create_server(config_path: str | None = None) -> Any:
         )
 
         # Generate
-        img_provider = get_provider(provider, api_key, model=provider_config.model)
+        effective_model = model or provider_config.model
+        img_provider = get_provider(provider, api_key, model=effective_model)
         result = await img_provider.generate(gen_config)
 
         elapsed_ms = int((time.monotonic() - start) * 1000)
@@ -184,7 +197,7 @@ def create_server(config_path: str | None = None) -> Any:
         cost_tracker.record(
             GenerationRecord(
                 provider=provider,
-                model=provider_config.model,
+                model=effective_model,
                 diagram_type=diagram_type,
                 resolution=resolution,
                 aspect_ratio=aspect_ratio,
@@ -319,6 +332,8 @@ def create_server(config_path: str | None = None) -> Any:
                     "description": t.description,
                     "supports": t.supports,
                     "variables": t.variables,
+                    "recommended_provider": t.recommended_provider,
+                    "recommended_model": t.recommended_model,
                 }
                 for t in templates.values()
             ],

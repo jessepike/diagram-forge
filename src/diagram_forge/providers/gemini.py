@@ -18,7 +18,7 @@ class GeminiProvider(BaseImageProvider):
     """Provider for Google Gemini image generation."""
 
     def default_model(self) -> str:
-        return "gemini-2.0-flash-preview-image-generation"
+        return "gemini-2.5-flash-image"
 
     async def generate(self, config: GenerationConfig) -> GenerationResult:
         start = time.monotonic()

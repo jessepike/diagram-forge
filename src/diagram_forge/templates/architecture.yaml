@@ -1,7 +1,7 @@
 name: architecture
 display_name: "Enterprise Architecture (TOGAF)"
-description: "Layered TOGAF-style architecture diagram with color-coded components"
-version: "1.0"
+description: "Layered TOGAF-style architecture diagram with color-coded horizontal bands and components"
+version: "2.0"
 supports:
   - architecture
   - system_design
@@ -9,37 +9,54 @@ supports:
 
 style_defaults:
   background: "white"
-  font: "sans-serif"
+  font: "bold sans-serif"
   corners: "slightly rounded"
-  borders: "black"
+  borders: "dark gray (#555555)"
   aspect_ratio: "16:9"
 
 color_system:
-  description: "Colors encode layer meaning, not decoration"
+  description: "TOGAF layer colors based on ArchiMate conventions. Colors encode layer meaning, not decoration."
   palette:
-    business: "light purple"
-    application: "light blue"
-    technology: "light orange"
-    integration: "light gray"
-    data: "light green"
+    business: "#FFFACD (pale yellow, border #D6B656) — ArchiMate convention"
+    application: "#DAE8FC (pale blue, border #6C8EBF) — ArchiMate convention"
+    technology: "#D5E8D4 (pale green, border #82B366) — ArchiMate convention"
+    integration: "#F5F5F5 (light gray, border #666666)"
+    data: "#FFF2CC (pale gold, border #D6B656)"
 
 prompt_template: |
-  Create an enterprise-grade architecture diagram in TOGAF style.
-  {style_defaults_block}
+  Create an enterprise-grade TOGAF-style layered architecture diagram.
 
-  COLOR SYSTEM:
+  CRITICAL RENDERING INSTRUCTIONS:
+  - Flat 2D only — NO shadows, NO gradients, NO 3D effects, NO artistic embellishment
+  - All text must be LARGE, bold, sans-serif — title 24pt, labels 18pt, subtitles 14pt
+  - Each box must be wide enough to fit its label without wrapping
+  - Use generous whitespace between all elements
+  - All arrows dark gray (#555555) with clear arrowheads
+  - {style_defaults_block}
+
+  COLOR SYSTEM (use exact hex codes):
   {color_system_block}
+
+  Each layer is a horizontal band spanning the full width with its layer color as a light background fill.
+  Components within each band are white boxes with colored left borders matching their layer.
 
   TITLE: {title}
 
-  LAYERS (top to bottom):
+  LAYERS (horizontal bands, top to bottom):
   {layers_block}
 
-  CONNECTIONS:
+  CONNECTIONS (arrows between components):
   {connections_block}
 
-  LEGEND (bottom):
+  LEGEND (bottom-right corner, small box):
   {legend_block}
+
+  LAYOUT RULES:
+  - Layers stack top-to-bottom as horizontal bands
+  - Components within a layer arrange left-to-right
+  - Arrows flow top-to-bottom between layers where possible
+  - All text horizontal and readable — never rotated or diagonal
+  - Maintain consistent spacing between bands
 
   All text crystal clear and perfectly legible. Enterprise presentation quality.
   Professional, clean design with clear visual hierarchy.

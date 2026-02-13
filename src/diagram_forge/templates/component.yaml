@@ -1,7 +1,7 @@
 name: component
 display_name: "Component Detail View"
-description: "Detailed component diagram showing internal structure and interfaces"
-version: "1.0"
+description: "Detailed component diagram showing internal structure, interfaces, and dependencies"
+version: "2.0"
 supports:
   - component
   - module
@@ -9,43 +9,59 @@ supports:
 
 style_defaults:
   background: "white"
-  font: "sans-serif"
+  font: "bold sans-serif"
   corners: "rounded"
-  borders: "dark blue"
+  borders: "dark gray (#555555)"
   aspect_ratio: "16:9"
 
 color_system:
-  description: "Colors indicate component types"
+  description: "Colors distinguish interface types and internal/external boundaries"
   palette:
-    api: "light blue"
-    service: "light purple"
-    database: "light green"
-    cache: "light yellow"
-    external: "light gray"
+    public_interface: "#AED6F1 (light blue, border #5DADE2)"
+    internal_module: "#FDEBD0 (light orange, border #F0B27A)"
+    dependency: "#D5D8DC (light gray, border #ABB2B9)"
+    data_store: "#A9DFBF (light green, border #58D68D)"
+    event: "#F5B7B1 (light red, border #EC7063)"
 
 prompt_template: |
-  Create a detailed component diagram showing internal structure.
-  {style_defaults_block}
+  Create a detailed component diagram showing internal structure and interfaces.
+
+  CRITICAL RENDERING INSTRUCTIONS:
+  - Flat 2D technical diagram — NO shadows, NO gradients, NO 3D effects
+  - All text must be LARGE, bold, sans-serif — title 24pt, labels 18pt, subtitles 12pt
+  - Use rounded-corner rectangles for all boxes
+  - The main component is a large dashed boundary box containing internal modules
+  - External interfaces shown as small boxes on the boundary edge
+  - Dependencies shown outside the main boundary
+  - Generous whitespace between elements
+  - All arrows dark gray (#555555) with clear arrowheads
+  - {style_defaults_block}
 
   COLOR SYSTEM:
   {color_system_block}
 
-  COMPONENT: {title}
+  TITLE: {title}
 
-  INTERFACES (exposed APIs/ports):
+  EXTERNAL INTERFACES (shown on the boundary edge):
   {interfaces_block}
 
-  INTERNAL MODULES:
+  INTERNAL MODULES (inside the main boundary):
   {modules_block}
 
-  DEPENDENCIES (external services/databases):
+  EXTERNAL DEPENDENCIES (outside the boundary):
   {dependencies_block}
 
-  LEGEND (bottom):
+  LEGEND (bottom-right):
   {legend_block}
 
-  Show clear boundaries between internal and external. Use lollipop notation for interfaces.
-  All text crystal clear and perfectly legible. Enterprise presentation quality.
+  LAYOUT RULES:
+  - Main component boundary is a large dashed rectangle in the center
+  - Interfaces on the edges of the boundary (top for inputs, bottom for outputs)
+  - Internal modules arranged in logical groups within the boundary
+  - Dependencies placed outside the boundary, connected by arrows
+  - All text horizontal and readable
+
+  All text crystal clear and perfectly legible. Clean technical diagram.
   {aspect_ratio} aspect ratio. {resolution} resolution.
 
 variables:

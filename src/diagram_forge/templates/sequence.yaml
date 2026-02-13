@@ -1,7 +1,7 @@
 name: sequence
 display_name: "Sequence Diagram"
-description: "UML sequence diagram showing interactions over time"
-version: "1.0"
+description: "UML-style sequence diagram showing interactions between participants over time"
+version: "2.0"
 supports:
   - sequence
   - interaction
@@ -9,25 +9,34 @@ supports:
 
 style_defaults:
   background: "white"
-  font: "monospace"
-  corners: "square"
-  borders: "black"
+  font: "bold sans-serif"
+  corners: "slightly rounded"
+  borders: "dark gray (#555555)"
   aspect_ratio: "9:16"
 
 color_system:
-  description: "Colors indicate participant types"
+  description: "Colors distinguish participant types"
   palette:
-    user: "light blue"
-    frontend: "light green"
-    backend: "light purple"
-    database: "light orange"
-    external: "light gray"
+    actor: "#D5D8DC (light gray, border #ABB2B9)"
+    internal_service: "#AED6F1 (light blue, border #5DADE2)"
+    external_service: "#FDEBD0 (light orange, border #F0B27A)"
+    database: "#A9DFBF (light green, border #58D68D)"
 
 prompt_template: |
-  Create a UML sequence diagram showing interactions over time.
-  {style_defaults_block}
+  Create a UML-style sequence diagram showing interactions over time.
 
-  COLOR SYSTEM:
+  CRITICAL RENDERING INSTRUCTIONS:
+  - Flat 2D technical diagram — NO shadows, NO gradients, NO 3D effects
+  - All text must be LARGE, bold, sans-serif — title 24pt, participant labels 18pt, messages 12pt
+  - Participants shown as labeled boxes at the top with vertical dashed lifelines
+  - Messages as horizontal arrows between lifelines, labeled above the arrow
+  - Time flows top-to-bottom
+  - Activation boxes (thin rectangles) on lifelines during active processing
+  - Generous vertical spacing between messages (minimum 30px)
+  - Solid arrows for synchronous calls, dashed arrows for returns
+  - {style_defaults_block}
+
+  COLOR SYSTEM (participant box colors):
   {color_system_block}
 
   TITLE: {title}
@@ -35,18 +44,24 @@ prompt_template: |
   PARTICIPANTS (left to right):
   {participants_block}
 
-  INTERACTIONS (in chronological order):
+  INTERACTIONS (top to bottom, in time order):
   {interactions_block}
 
   NOTES:
   {notes_block}
 
-  LEGEND (bottom):
+  LEGEND (bottom-right):
   {legend_block}
 
-  Use standard UML notation: solid arrows for synchronous calls, dashed for responses.
-  Show activation boxes on lifelines. Number interactions sequentially.
-  All text crystal clear and perfectly legible. Enterprise presentation quality.
+  LAYOUT RULES:
+  - Participants arranged left to right at the top
+  - Dashed vertical lifelines extend downward from each participant
+  - Self-calls shown as arrows looping back to the same lifeline
+  - Notes shown as rectangles with folded corners, connected by dashed lines
+  - All text horizontal and readable — message labels never overlap
+  - Number interactions sequentially
+
+  All text crystal clear and perfectly legible. Clean technical diagram.
   {aspect_ratio} aspect ratio. {resolution} resolution.
 
 variables:

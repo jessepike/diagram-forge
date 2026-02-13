@@ -1,0 +1,82 @@
+name: c4_container
+display_name: "C4 Container Diagram"
+description: "C4 Model Level 2 container diagram showing system internals with dashed boundaries"
+version: "1.0"
+supports:
+  - c4
+  - c4_container
+  - container
+  - software_architecture
+
+style_defaults:
+  background: "white"
+  font: "bold sans-serif"
+  corners: "rounded"
+  borders: "dark gray (#555555)"
+  aspect_ratio: "16:9"
+
+color_system:
+  description: "C4 Model standard colors based on Structurizr/PlantUML conventions"
+  palette:
+    person: "#08427B background, white text, border #073B6F (dark blue)"
+    software_system: "#1168BD background, white text, border #3C7FC0 (blue)"
+    container: "#438DD5 background, white text, border #3C7FC0 (medium blue)"
+    component: "#85BBF0 background, black text, border #78A8D8 (light blue)"
+    external_system: "#999999 background, white text, border #8A8A8A (gray)"
+    database: "#438DD5 background, white text, border #3C7FC0 (cylinder shape)"
+
+prompt_template: |
+  Generate a clean, professional C4 Container diagram.
+
+  CRITICAL RENDERING INSTRUCTIONS:
+  - Flat 2D technical diagram — NO shadows, NO gradients, NO 3D effects
+  - Orthographic view (straight on, not skewed or angled)
+  - All text must be LARGE, bold, sans-serif — title 24pt, box labels 18pt, subtitles 12pt
+  - Each box must be minimum 160px wide and 70px tall
+  - Use rounded-corner rectangles for all boxes
+  - Generous whitespace between all elements and rows
+  - All arrows dark gray (#555555) with clear arrowheads
+  - Arrow labels 12pt, positioned near the middle of the arrow
+  - {style_defaults_block}
+
+  C4 COLOR CONVENTIONS (use these exact styles):
+  {color_system_block}
+
+  Each box has TWO lines of text:
+  - Line 1: Bold label (name of the element)
+  - Line 2: Smaller italic subtitle (technology or description)
+
+  TITLE: {title}
+
+  ELEMENTS:
+  {elements_block}
+
+  BOUNDARIES (dashed rectangles grouping related elements):
+  {boundaries_block}
+
+  RELATIONSHIPS (labeled arrows between elements):
+  {relationships_block}
+
+  LEGEND (bottom-right, small box):
+  {legend_block}
+
+  LAYOUT RULES:
+  - Arrange elements in clear rows, top-to-bottom
+  - People/users at the top
+  - Internal containers in the middle
+  - External systems at the bottom
+  - Group related elements within dashed boundary boxes
+  - All text horizontal and readable — never rotated
+  - Consistent spacing between rows (minimum 40px gap)
+  - Arrows should not cross unnecessarily
+
+  All text crystal clear and perfectly legible.
+  Clean, minimalist technical diagram. No decorative elements.
+  {aspect_ratio} aspect ratio. {resolution} resolution.
+
+variables:
+  title: "Required. C4 diagram title (e.g. 'C4 Container Diagram: My System')."
+  elements_block: "Required. Element definitions with type, name, subtitle, and color."
+  boundaries_block: "Optional. Dashed boundary groups with labels."
+  relationships_block: "Required. Arrow definitions with source, target, and label."
+  legend_block: "Optional. Auto-generated from color_system if not provided."

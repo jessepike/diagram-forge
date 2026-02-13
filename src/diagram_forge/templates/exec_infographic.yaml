@@ -1,0 +1,72 @@
+name: exec_infographic
+display_name: "Executive Infographic"
+description: "Presentation-ready architecture overview with semantic colors, icons, and layered bands"
+version: "1.0"
+supports:
+  - exec_infographic
+  - executive
+  - overview_architecture
+  - presentation
+
+style_defaults:
+  background: "white"
+  font: "bold sans-serif"
+  corners: "rounded"
+  borders: "none (boxes use colored fills)"
+  aspect_ratio: "16:9"
+
+color_system:
+  description: "Semantic colors encode meaning/concern, not layer position"
+  palette:
+    governance: "#F4CCCC (light red, border #E06666)"
+    alignment: "#FFF2CC (light yellow, border #F1C232)"
+    health: "#D0E0F0 (light blue, border #6FA8DC)"
+    optimization: "#D9EAD3 (light green, border #6AA84F)"
+    neutral: "#F3F3F3 (light gray, border #CCCCCC)"
+
+prompt_template: |
+  Generate a modern executive infographic-style architecture diagram.
+
+  CRITICAL RENDERING INSTRUCTIONS:
+  - Polished, presentation-ready visual — suitable for stakeholder decks
+  - Flat 2D — NO shadows or 3D effects, but small ICONS inside boxes are encouraged
+  - All text must be VERY LARGE and bold — title 28pt, box labels 20pt, subtitles 14pt
+  - Use rounded-corner rectangles with colored fills (not just borders)
+  - Each horizontal band has a light gray (#F3F3F3) background fill
+  - Band labels (e.g. "CORE PLATFORM") in bold uppercase, top-left of band
+  - Generous spacing between bands and between boxes within bands
+  - Arrows are thick dark gray (#555555) with large arrowheads
+  - Arrow labels 14pt bold, positioned clearly
+  - {style_defaults_block}
+
+  SEMANTIC COLOR CODING (box colors encode MEANING):
+  {color_system_block}
+
+  ICONS: Include small symbolic icons inside each box (e.g. clock for scheduler, magnifying glass for monitoring, gear for engine, database cylinder for storage, bell for notifications). Icons should be simple line-art style.
+
+  TITLE: {title}
+
+  BANDS (horizontal sections, top to bottom):
+  {bands_block}
+
+  CONNECTIONS (arrows between components across bands):
+  {connections_block}
+
+  LEGEND (top-right corner):
+  {legend_block}
+
+  LAYOUT RULES:
+  - Bands stack top-to-bottom, each spanning full width
+  - Components within a band flow left-to-right (pipeline style) or are centered
+  - Cross-band arrows flow vertically
+  - All text horizontal and readable
+  - Balance visual weight — no band should feel overcrowded
+
+  Executive presentation quality. Clean, modern, and professional.
+  {aspect_ratio} aspect ratio. {resolution} resolution.
+
+variables:
+  title: "Required. Diagram title."
+  bands_block: "Required. Horizontal band definitions with their components."
+  connections_block: "Required. Arrow definitions between components."
+  legend_block: "Optional. Auto-generated from color_system if not provided."
