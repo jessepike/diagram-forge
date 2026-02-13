@@ -1,0 +1,92 @@
+version: 1
+name: diagram-forge-baseline-v1
+notes: |
+  Small, low-cost benchmark to compare provider/model quality before MCP server changes.
+  Target budget: <= $5 per full matrix run.
+
+prompts:
+  - id: arch_three_tier
+    diagram_type: architecture
+    prompt: >
+      Three-tier enterprise web system. Top layer: React web app and iOS app.
+      Middle layer: API Gateway, Auth service, Order service, Payment service.
+      Data layer: PostgreSQL, Redis cache, S3 object storage. Show request flow arrows,
+      trust boundary between internet and VPC, and label all components clearly.
+    must_include_labels:
+      - API Gateway
+      - Auth service
+      - Order service
+      - Payment service
+      - PostgreSQL
+      - Redis
+      - S3
+
+  - id: dataflow_etl
+    diagram_type: data_flow
+    prompt: >
+      Nightly ETL pipeline: Salesforce and Stripe source systems feed raw landing bucket,
+      then dbt transforms into warehouse marts. Include data quality checks, failed-record
+      quarantine, and BI dashboard consumers. Use directional arrows and clear stages.
+    must_include_labels:
+      - Salesforce
+      - Stripe
+      - Raw landing
+      - dbt
+      - Warehouse
+      - Quarantine
+      - BI dashboard
+
+  - id: sequence_checkout
+    diagram_type: sequence
+    prompt: >
+      E-commerce checkout sequence: Browser -> API Gateway -> Cart Service -> Payment Provider
+      -> Order Service -> Email Service. Include success and payment-failure branches with
+      numbered steps and response arrows.
+    must_include_labels:
+      - Browser
+      - API Gateway
+      - Cart Service
+      - Payment Provider
+      - Order Service
+      - Email Service
+
+  - id: component_iam
+    diagram_type: component
+    prompt: >
+      Identity platform component diagram with Auth API, Token Service, Policy Engine,
+      User Directory, Audit Logger. Show internal dependencies and one external SSO provider.
+      Keep labels concise and legible.
+    must_include_labels:
+      - Auth API
+      - Token Service
+      - Policy Engine
+      - User Directory
+      - Audit Logger
+      - SSO provider
+
+  - id: integration_crm_erp
+    diagram_type: integration
+    prompt: >
+      Integration landscape connecting CRM, ERP, Billing, Support, and Data Warehouse via
+      iPaaS. Show sync vs async paths and error handling dead-letter queue.
+    must_include_labels:
+      - CRM
+      - ERP
+      - Billing
+      - Support
+      - Data Warehouse
+      - iPaaS
+      - Dead-letter queue
+
+  - id: infographic_zero_trust
+    diagram_type: infographic
+    prompt: >
+      Enterprise explainer infographic: Zero Trust in 5 pillars.
+      Pillars: Verify explicitly, Least privilege, Assume breach, Continuous monitoring,
+      Device trust. Professional business style, icon-led sections, clear heading hierarchy.
+    must_include_labels:
+      - Verify explicitly
+      - Least privilege
+      - Assume breach
+      - Continuous monitoring
+      - Device trust

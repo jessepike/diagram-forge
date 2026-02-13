@@ -1,0 +1,39 @@
+{
+  "run_timestamp": "20260213_110626",
+  "execute": true,
+  "providers": [
+    "gemini",
+    "openai"
+  ],
+  "resolution": "1K",
+  "aspect_ratio": "16:9",
+  "max_cases": 1,
+  "estimated_cost_usd": 0.05,
+  "actual_cost_usd": 0.055,
+  "success_rate": 1.0,
+  "prompt_completeness_scores": {
+    "design-architecture": 1.0
+  },
+  "results": [
+    {
+      "case_id": "design-architecture",
+      "provider": "gemini",
+      "model": "gemini-2.5-flash-image",
+      "success": true,
+      "elapsed_ms": 9103,
+      "cost_usd": 0.039,
+      "output_path": "evals/runs/20260213_110626/gemini__gemini-2.5-flash-image__design-architecture.png",
+      "error": null
+    },
+    {
+      "case_id": "design-architecture",
+      "provider": "openai",
+      "model": "gpt-image-1",
+      "success": true,
+      "elapsed_ms": 63993,
+      "cost_usd": 0.016,
+      "output_path": "evals/runs/20260213_110626/openai__gpt-image-1__design-architecture.png",
+      "error": null
+    }
+  ]
+}

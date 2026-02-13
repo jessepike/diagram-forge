@@ -26,6 +26,7 @@
 - [x] Initial git + GitHub push
 
 ## Next Steps
+- [ ] Model and key management system — user-level config (`~/.diagram-forge/config.yaml`) that overrides defaults for provider models and API keys without editing source. Current pain: model names are hardcoded in 3 places, keys require shell env vars, no per-project override support.
 - [ ] Generate sample diagram images for README
 - [ ] Add bundled style reference image (enterprise-togaf/reference.png)
 - [ ] Publish to PyPI (`pip install diagram-forge`)

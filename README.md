@@ -12,10 +12,11 @@ Instead of wrestling with diagramming tools or manually crafting image generatio
 
 ## Features
 
-- **7 diagram templates** — Architecture (TOGAF), data flow, component, sequence, integration, infographic, and generic
-- **3 image providers** — Google Gemini, OpenAI (GPT Image), Replicate (Flux)
-- **Template-driven prompts** — YAML templates with style defaults, color systems, and variable substitution
-- **Style references** — Apply consistent visual styles with reference images
+- **9 diagram templates** — Architecture (TOGAF), C4 Container, Executive Infographic, data flow, component, sequence, integration, infographic, and generic
+- **3 image providers** — Google Gemini (recommended), OpenAI (GPT Image), Replicate (Flux)
+- **Auto provider selection** — Each template recommends the best provider/model for its diagram type
+- **Template-driven prompts** — YAML templates with hex-coded color systems, explicit rendering instructions, and layout rules
+- **Style references** — Feed a visual example to guide output consistency (Gemini)
 - **Cost tracking** — SQLite-backed usage and cost reporting
 - **Cross-client** — Works with Claude Code, Claude Desktop, Codex CLI, Gemini CLI via stdio transport
 
@@ -98,12 +99,28 @@ Or be more specific:
 | Type | Template | Best For |
 |------|----------|----------|
 | `architecture` | Enterprise Architecture (TOGAF) | System architecture, layered designs |
-| `data_flow` | Data Flow Diagram | ETL pipelines, data movement |
+| `c4_container` | C4 Container Diagram | Software system internals, C4 Level 2 |
+| `exec_infographic` | Executive Infographic | Stakeholder presentations, semantic colors + icons |
+| `data_flow` | Data Flow / Pipeline | ETL pipelines, data movement |
 | `component` | Component Detail View | Service internals, module structure |
 | `sequence` | Sequence Diagram | Request flows, protocol interactions |
-| `integration` | Integration Map | System connections, API landscape |
+| `integration` | Integration / Connection Map | System connections, API landscape |
 | `infographic` | Infographic / Learning Card | Concept explanations, overviews |
 | `generic` | Custom / Freeform | Anything else |
+
+### Style References
+
+Feed a visual example to guide output consistency. Gemini supports this natively via multi-image input.
+
+```
+generate_diagram(prompt="...", style_reference="c4-container")
+```
+
+Save your own styles to `~/.diagram-forge/styles/<name>/reference.png` with an optional `style.yaml` for metadata.
+
+### Auto Provider Selection
+
+Set `provider="auto"` (the default) and Diagram Forge picks the best provider based on the diagram type. Each template includes a tested recommendation. Override with `provider="openai"` or `provider="gemini"` when you want a specific model.
 
 ## Claude Code Plugin
 
@@ -120,7 +137,7 @@ To use, install the plugin or add the `.mcp.json` from the plugin directory.
 
 ## How It Works
 
-1. **Template selection** — Matches your request to one of 7 YAML templates, each encoding proven prompt patterns (color systems, layer organization, legibility rules)
+1. **Template selection** — Matches your request to one of 9 YAML templates, each encoding proven prompt patterns (color systems, layer organization, legibility rules)
 2. **Prompt rendering** — Merges your description with the template, substituting variables and applying style defaults
 3. **Provider dispatch** — Sends the engineered prompt to your chosen provider (Gemini, OpenAI, or Replicate)
 4. **Image handling** — Saves the generated image, records cost and metadata to SQLite
@@ -143,7 +160,16 @@ mypy src/
 
 # Test MCP tools interactively
 npx @modelcontextprotocol/inspector python -m diagram_forge.server
+
+# Run low-cost model benchmark (dry-run first)
+python scripts/eval_diagram_models.py --dry-run --max-cost-usd 5
+python scripts/eval_diagram_models.py --execute --providers gemini,openai --resolution 1K --max-cases 6 --max-cost-usd 5
 ```
+
+Benchmark and model-refresh docs:
+- `docs/evaluation-runbook.md`
+- `docs/model-refresh-process.md`
+- `evals/benchmark_v1.yaml`
 
 ## Architecture
 
@@ -160,7 +186,7 @@ src/diagram_forge/
     gemini.py            # Google Gemini
     openai_provider.py   # OpenAI GPT Image
     replicate_provider.py # Replicate Flux
-  templates/             # 7 YAML prompt templates
+  templates/             # 9 YAML prompt templates
 ```
 
 ## License

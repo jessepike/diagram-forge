@@ -1,0 +1,144 @@
+{
+  "run_timestamp": "20260213_105451",
+  "execute": false,
+  "providers": [
+    "gemini",
+    "openai"
+  ],
+  "resolution": "1K",
+  "aspect_ratio": "16:9",
+  "max_cases": 6,
+  "estimated_cost_usd": 0.3,
+  "actual_cost_usd": 0.3,
+  "success_rate": 1.0,
+  "prompt_completeness_scores": {
+    "arch_three_tier": 1.0,
+    "dataflow_etl": 1.0,
+    "sequence_checkout": 1.0,
+    "component_iam": 1.0,
+    "integration_crm_erp": 1.0,
+    "infographic_zero_trust": 1.0
+  },
+  "results": [
+    {
+      "case_id": "arch_three_tier",
+      "provider": "gemini",
+      "model": "gemini-2.5-flash-image",
+      "success": true,
+      "elapsed_ms": 0,
+      "cost_usd": 0.039,
+      "output_path": null,
+      "error": null
+    },
+    {
+      "case_id": "dataflow_etl",
+      "provider": "gemini",
+      "model": "gemini-2.5-flash-image",
+      "success": true,
+      "elapsed_ms": 0,
+      "cost_usd": 0.039,
+      "output_path": null,
+      "error": null
+    },
+    {
+      "case_id": "sequence_checkout",
+      "provider": "gemini",
+      "model": "gemini-2.5-flash-image",
+      "success": true,
+      "elapsed_ms": 0,
+      "cost_usd": 0.039,
+      "output_path": null,
+      "error": null
+    },
+    {
+      "case_id": "component_iam",
+      "provider": "gemini",
+      "model": "gemini-2.5-flash-image",
+      "success": true,
+      "elapsed_ms": 0,
+      "cost_usd": 0.039,
+      "output_path": null,
+      "error": null
+    },
+    {
+      "case_id": "integration_crm_erp",
+      "provider": "gemini",
+      "model": "gemini-2.5-flash-image",
+      "success": true,
+      "elapsed_ms": 0,
+      "cost_usd": 0.039,
+      "output_path": null,
+      "error": null
+    },
+    {
+      "case_id": "infographic_zero_trust",
+      "provider": "gemini",
+      "model": "gemini-2.5-flash-image",
+      "success": true,
+      "elapsed_ms": 0,
+      "cost_usd": 0.039,
+      "output_path": null,
+      "error": null
+    },
+    {
+      "case_id": "arch_three_tier",
+      "provider": "openai",
+      "model": "gpt-image-1",
+      "success": true,
+      "elapsed_ms": 0,
+      "cost_usd": 0.011,
+      "output_path": null,
+      "error": null
+    },
+    {
+      "case_id": "dataflow_etl",
+      "provider": "openai",
+      "model": "gpt-image-1",
+      "success": true,
+      "elapsed_ms": 0,
+      "cost_usd": 0.011,
+      "output_path": null,
+      "error": null
+    },
+    {
+      "case_id": "sequence_checkout",
+      "provider": "openai",
+      "model": "gpt-image-1",
+      "success": true,
+      "elapsed_ms": 0,
+      "cost_usd": 0.011,
+      "output_path": null,
+      "error": null
+    },
+    {
+      "case_id": "component_iam",
+      "provider": "openai",
+      "model": "gpt-image-1",
+      "success": true,
+      "elapsed_ms": 0,
+      "cost_usd": 0.011,
+      "output_path": null,
+      "error": null
+    },
+    {
+      "case_id": "integration_crm_erp",
+      "provider": "openai",
+      "model": "gpt-image-1",
+      "success": true,
+      "elapsed_ms": 0,
+      "cost_usd": 0.011,
+      "output_path": null,
+      "error": null
+    },
+    {
+      "case_id": "infographic_zero_trust",
+      "provider": "openai",
+      "model": "gpt-image-1",
+      "success": true,
+      "elapsed_ms": 0,
+      "cost_usd": 0.011,
+      "output_path": null,
+      "error": null
+    }
+  ]
+}
