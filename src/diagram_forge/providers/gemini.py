@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+from typing import Any
 
 from diagram_forge.models import (
     BillingModel,
@@ -35,7 +36,7 @@ class GeminiProvider(BaseImageProvider):
             )
 
             # Build prompt parts
-            contents: list = [config.prompt]
+            contents: Any = [config.prompt]
 
             # Add style reference if provided
             if config.style_reference_path and config.style_reference_path.exists():
@@ -62,7 +63,7 @@ class GeminiProvider(BaseImageProvider):
                     }.get(suffix, "image/png")
                     contents.insert(0, types.Part.from_bytes(data=ref_bytes, mime_type=mime))
 
-            response = client.models.generate_content(
+            response: Any = client.models.generate_content(
                 model=self.model,
                 contents=contents,
                 config=gen_config,
@@ -71,12 +72,20 @@ class GeminiProvider(BaseImageProvider):
             elapsed_ms = int((time.monotonic() - start) * 1000)
 
             # Extract image from response
-            if response.candidates:
-                for part in response.candidates[0].content.parts:
-                    if part.inline_data and part.inline_data.mime_type.startswith("image/"):
+            candidates = getattr(response, "candidates", None) or []
+            if candidates:
+                content = getattr(candidates[0], "content", None)
+                parts = getattr(content, "parts", None) or []
+                for part in parts:
+                    inline_data = getattr(part, "inline_data", None)
+                    mime_type = getattr(inline_data, "mime_type", "")
+                    if inline_data and isinstance(mime_type, str) and mime_type.startswith("image/"):
+                        image_data = getattr(inline_data, "data", None)
+                        if not isinstance(image_data, (bytes, bytearray)):
+                            continue
                         return GenerationResult(
                             success=True,
-                            image_data=part.inline_data.data,
+                            image_data=bytes(image_data),
                             model_used=self.model,
                             cost_usd=0.039,
                             billing_model=BillingModel.PER_IMAGE,
@@ -105,7 +114,7 @@ class GeminiProvider(BaseImageProvider):
             )
 
             # Build contents with input image + edit prompt
-            contents = [
+            contents: Any = [
                 types.Part.from_bytes(data=input_image, mime_type="image/png"),
                 config.prompt,
             ]
@@ -123,7 +132,7 @@ class GeminiProvider(BaseImageProvider):
                     }.get(suffix, "image/png")
                     contents.insert(0, types.Part.from_bytes(data=ref_bytes, mime_type=mime))
 
-            response = client.models.generate_content(
+            response: Any = client.models.generate_content(
                 model=self.model,
                 contents=contents,
                 config=gen_config,
@@ -131,12 +140,20 @@ class GeminiProvider(BaseImageProvider):
 
             elapsed_ms = int((time.monotonic() - start) * 1000)
 
-            if response.candidates:
-                for part in response.candidates[0].content.parts:
-                    if part.inline_data and part.inline_data.mime_type.startswith("image/"):
+            candidates = getattr(response, "candidates", None) or []
+            if candidates:
+                content = getattr(candidates[0], "content", None)
+                parts = getattr(content, "parts", None) or []
+                for part in parts:
+                    inline_data = getattr(part, "inline_data", None)
+                    mime_type = getattr(inline_data, "mime_type", "")
+                    if inline_data and isinstance(mime_type, str) and mime_type.startswith("image/"):
+                        image_data = getattr(inline_data, "data", None)
+                        if not isinstance(image_data, (bytes, bytearray)):
+                            continue
                         return GenerationResult(
                             success=True,
-                            image_data=part.inline_data.data,
+                            image_data=bytes(image_data),
                             model_used=self.model,
                             cost_usd=0.039,
                             billing_model=BillingModel.PER_IMAGE,

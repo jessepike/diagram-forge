@@ -6,7 +6,7 @@ from pathlib import Path
 
 import yaml
 
-from diagram_forge.models import DiagramTemplate, DiagramType
+from diagram_forge.models import DiagramTemplate
 
 TEMPLATES_DIR = Path(__file__).parent / "templates"
 
@@ -25,7 +25,7 @@ def load_template(template_name: str) -> DiagramTemplate:
 
 def load_all_templates() -> dict[str, DiagramTemplate]:
     """Load all available templates."""
-    templates = {}
+    templates: dict[str, DiagramTemplate] = {}
     if not TEMPLATES_DIR.exists():
         return templates
 

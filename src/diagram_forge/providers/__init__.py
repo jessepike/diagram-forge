@@ -1,5 +1,7 @@
 """Provider registry and factory for image generation providers."""
 
+from typing import Any
+
 from diagram_forge.providers.base import BaseImageProvider
 from diagram_forge.providers.gemini import GeminiProvider
 from diagram_forge.providers.openai_provider import OpenAIProvider
@@ -12,7 +14,7 @@ PROVIDER_MAP: dict[str, type[BaseImageProvider]] = {
 }
 
 
-def get_provider(provider_name: str, api_key: str, **kwargs) -> BaseImageProvider:
+def get_provider(provider_name: str, api_key: str, **kwargs: Any) -> BaseImageProvider:
     """Instantiate a provider by name."""
     provider_cls = PROVIDER_MAP.get(provider_name)
     if not provider_cls:

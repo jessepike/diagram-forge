@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
 
 from diagram_forge.models import AspectRatio, GenerationConfig, Resolution
 from diagram_forge.providers.replicate_provider import ReplicateProvider

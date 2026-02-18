@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import base64
 import time
+from typing import Literal
 
 from diagram_forge.models import (
     BillingModel,
@@ -21,7 +22,9 @@ class OpenAIProvider(BaseImageProvider):
     def default_model(self) -> str:
         return "gpt-image-1.5"
 
-    def _resolve_size(self, config: GenerationConfig) -> str:
+    def _resolve_size(
+        self, config: GenerationConfig
+    ) -> Literal["1024x1024", "1536x1024", "1024x1536"]:
         """Map resolution + aspect ratio to OpenAI size string."""
         ar = config.aspect_ratio.value
         if ar == "16:9":
@@ -47,6 +50,7 @@ class OpenAIProvider(BaseImageProvider):
                 prompt=config.prompt,
                 n=1,
                 size=size,
+                response_format="b64_json",
             )
 
             elapsed_ms = int((time.monotonic() - start) * 1000)
@@ -90,6 +94,7 @@ class OpenAIProvider(BaseImageProvider):
                 prompt=config.prompt,
                 n=1,
                 size=size,
+                response_format="b64_json",
             )
 
             elapsed_ms = int((time.monotonic() - start) * 1000)
