@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+import os
 import time
 from dataclasses import asdict
 from pathlib import Path
-from typing import Any
+from typing import Annotated, Any, Literal, cast
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from diagram_forge.config import ensure_directories, load_config, resolve_api_key
 from diagram_forge.cost_tracker import CostTracker
@@ -17,11 +18,19 @@ from diagram_forge.models import (
     DiagramType,
     GenerationConfig,
     GenerationRecord,
+    ProviderName,
     Resolution,
 )
 from diagram_forge.providers import PROVIDER_MAP, get_provider
 from diagram_forge.style_manager import StyleManager
 from diagram_forge.template_engine import build_prompt, load_all_templates, load_template
+
+ProviderChoice = Literal["auto", "gemini", "openai", "replicate"]
+ReportGroupBy = Literal["provider", "diagram_type", "day"]
+
+SAFE_IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".webp"}
+MAX_IMAGE_INPUT_BYTES = 15 * 1024 * 1024
+ENABLE_CONFIGURE_PROVIDER_ENV = "DIAGRAM_FORGE_ENABLE_CONFIGURE_PROVIDER"
 
 
 def _serialize(value: Any) -> Any:
@@ -46,6 +55,52 @@ def _serialize(value: Any) -> Any:
     return value
 
 
+def _resolve_path(path: Path, *, must_exist: bool) -> Path:
+    expanded = path.expanduser()
+    if not expanded.is_absolute():
+        expanded = Path.cwd() / expanded
+    return expanded.resolve(strict=must_exist)
+
+
+def _is_within_roots(path: Path, roots: list[Path]) -> bool:
+    return any(path.is_relative_to(root) for root in roots)
+
+
+def _validate_readable_image_path(path: Path, roots: list[Path]) -> tuple[Path | None, str | None]:
+    try:
+        resolved = _resolve_path(path, must_exist=True)
+    except FileNotFoundError:
+        return None, f"File not found: {path}"
+
+    if not resolved.is_file():
+        return None, f"Not a file: {path}"
+    if resolved.suffix.lower() not in SAFE_IMAGE_EXTENSIONS:
+        return None, f"Unsupported image extension for '{path}'. Allowed: {sorted(SAFE_IMAGE_EXTENSIONS)}"
+    if not _is_within_roots(resolved, roots):
+        return None, "Path is outside allowed read directories."
+    size_bytes = resolved.stat().st_size
+    if size_bytes > MAX_IMAGE_INPUT_BYTES:
+        return None, f"Image exceeds max size ({MAX_IMAGE_INPUT_BYTES} bytes): {path}"
+    return resolved, None
+
+
+def _validate_writable_image_path(path: Path, roots: list[Path]) -> tuple[Path | None, str | None]:
+    resolved = _resolve_path(path, must_exist=False)
+    if resolved.suffix.lower() not in SAFE_IMAGE_EXTENSIONS:
+        return None, (
+            f"Unsupported output extension for '{path}'. Allowed: {sorted(SAFE_IMAGE_EXTENSIONS)}"
+        )
+    if not _is_within_roots(resolved, roots):
+        return None, "Path is outside allowed write directories."
+    return resolved, None
+
+
+def _build_alt_text(diagram_type: str, prompt: str) -> str:
+    """Return a simple textual fallback for screen readers and docs."""
+    summary = " ".join(prompt.split())
+    return f"{diagram_type} diagram. {summary[:240]}".strip()
+
+
 def create_server(config_path: str | None = None) -> Any:
     """Create and configure the Diagram Forge MCP server."""
     try:
@@ -62,54 +117,29 @@ def create_server(config_path: str | None = None) -> Any:
     # Initialize components
     cost_tracker = CostTracker(config.database_path)
     style_manager = StyleManager(config.styles_directory)
+    output_root = _resolve_path(Path(config.output_directory), must_exist=False)
+    styles_root = _resolve_path(Path(config.styles_directory), must_exist=False)
+    cwd_root = Path.cwd().resolve()
+    allowed_read_roots = [output_root, styles_root, cwd_root]
+    allowed_write_roots = [output_root]
 
     # Create FastMCP instance
     app = FastMCP("diagram-forge")
-
-    def _run_tool(func, *args, _tool_name: str = "unknown", **kwargs):
-        """Wrapper for timing and error handling."""
-        start = time.monotonic()
-        try:
-            result = func(*args, **kwargs)
-            return _serialize(result)
-        except Exception as e:
-            elapsed = int((time.monotonic() - start) * 1000)
-            return {
-                "status": "error",
-                "error": str(e),
-                "tool": _tool_name,
-                "elapsed_ms": elapsed,
-            }
-
-    async def _run_tool_async(func, *args, _tool_name: str = "unknown", **kwargs):
-        """Async wrapper for timing and error handling."""
-        start = time.monotonic()
-        try:
-            result = await func(*args, **kwargs)
-            return _serialize(result)
-        except Exception as e:
-            elapsed = int((time.monotonic() - start) * 1000)
-            return {
-                "status": "error",
-                "error": str(e),
-                "tool": _tool_name,
-                "elapsed_ms": elapsed,
-            }
 
     # --- Tool: generate_diagram ---
 
     @app.tool()
     async def generate_diagram(
         prompt: str,
-        diagram_type: str = "generic",
-        provider: str = "auto",
+        diagram_type: DiagramType = DiagramType.GENERIC,
+        provider: ProviderChoice = "auto",
         model: str | None = None,
-        resolution: str = "2K",
-        aspect_ratio: str = "16:9",
+        resolution: Resolution = Resolution.RES_2K,
+        aspect_ratio: AspectRatio = AspectRatio.WIDE,
         style_reference: str | None = None,
         output_path: str | None = None,
-        temperature: float = 1.0,
-    ) -> dict:
+        temperature: Annotated[float, Field(ge=0.0, le=2.0)] = 1.0,
+    ) -> dict[str, Any]:
         """Generate an architecture diagram from a text prompt.
 
         Args:
@@ -125,54 +155,67 @@ def create_server(config_path: str | None = None) -> Any:
         """
         start = time.monotonic()
 
+        diagram_type_name = diagram_type.value
+        resolution_name = resolution.value
+        aspect_ratio_name = aspect_ratio.value
+        provider_name: str = provider
+
         # Auto-select provider from template recommendation
-        if provider == "auto":
+        if provider_name == "auto":
             try:
-                tmpl = load_template(diagram_type)
-                provider = tmpl.recommended_provider or config.default_provider.value
+                tmpl = load_template(diagram_type_name)
+                provider_name = tmpl.recommended_provider or config.default_provider.value
                 if not model and tmpl.recommended_model:
                     model = tmpl.recommended_model
             except FileNotFoundError:
-                provider = config.default_provider.value
+                provider_name = config.default_provider.value
 
         # Resolve provider
-        provider_config = config.providers.get(provider)
+        provider_config = config.providers.get(provider_name)
         if not provider_config:
-            return {"status": "error", "error": f"Provider '{provider}' not configured"}
+            return {"status": "error", "error": f"Provider '{provider_name}' not configured"}
 
         api_key = resolve_api_key(provider_config)
         if not api_key:
             return {
                 "status": "error",
-                "error": f"No API key for provider '{provider}'. "
+                "error": f"No API key for provider '{provider_name}'. "
                 f"Set {provider_config.api_key_env} environment variable.",
             }
 
         # Build the full prompt from template + user prompt
         full_prompt = build_prompt(
-            diagram_type=diagram_type,
+            diagram_type=diagram_type_name,
             user_prompt=prompt,
-            resolution=resolution,
-            aspect_ratio=aspect_ratio,
+            resolution=resolution_name,
+            aspect_ratio=aspect_ratio_name,
         )
 
         # Resolve style reference
         style_path = None
         if style_reference:
-            style_path = style_manager.get_style_path(style_reference)
+            style = style_manager.get_style(style_reference)
+            if style:
+                style_path = style.path
+            else:
+                style_path, error = _validate_readable_image_path(
+                    Path(style_reference), allowed_read_roots
+                )
+                if error:
+                    return {"status": "error", "error": f"Invalid style_reference: {error}"}
 
         # Build generation config
         gen_config = GenerationConfig(
             prompt=full_prompt,
-            resolution=Resolution(resolution),
-            aspect_ratio=AspectRatio(aspect_ratio),
+            resolution=resolution,
+            aspect_ratio=aspect_ratio,
             temperature=temperature,
             style_reference_path=style_path,
         )
 
         # Generate
         effective_model = model or provider_config.model
-        img_provider = get_provider(provider, api_key, model=effective_model)
+        img_provider = get_provider(provider_name, api_key, model=effective_model)
         result = await img_provider.generate(gen_config)
 
         elapsed_ms = int((time.monotonic() - start) * 1000)
@@ -181,12 +224,13 @@ def create_server(config_path: str | None = None) -> Any:
         saved_path = None
         if result.success and result.image_data:
             if output_path:
-                save_to = Path(output_path).expanduser()
+                save_to, error = _validate_writable_image_path(Path(output_path), allowed_write_roots)
+                if error:
+                    return {"status": "error", "error": f"Invalid output_path: {error}"}
+                assert save_to is not None
             else:
-                output_dir = Path(config.output_directory).expanduser()
-                output_dir.mkdir(parents=True, exist_ok=True)
                 timestamp = time.strftime("%Y%m%d_%H%M%S")
-                save_to = output_dir / f"{diagram_type}_{timestamp}.png"
+                save_to = output_root / f"{diagram_type_name}_{timestamp}.png"
 
             save_to.parent.mkdir(parents=True, exist_ok=True)
             save_to.write_bytes(result.image_data)
@@ -196,27 +240,28 @@ def create_server(config_path: str | None = None) -> Any:
         # Track cost
         cost_tracker.record(
             GenerationRecord(
-                provider=provider,
+                provider=provider_name,
                 model=effective_model,
-                diagram_type=diagram_type,
-                resolution=resolution,
-                aspect_ratio=aspect_ratio,
+                diagram_type=diagram_type_name,
+                resolution=resolution_name,
+                aspect_ratio=aspect_ratio_name,
                 tokens_used=result.tokens_used,
                 cost_usd=result.cost_usd,
                 billing_model=result.billing_model.value,
                 generation_time_ms=elapsed_ms,
                 success=result.success,
                 output_path=saved_path,
-                template_used=diagram_type,
+                template_used=diagram_type_name,
                 style_used=style_reference,
                 error_message=result.error_message,
             )
         )
 
-        response = _serialize(result)
+        response = cast(dict[str, Any], _serialize(result))
         response["status"] = "success" if result.success else "error"
         if saved_path:
             response["output_path"] = saved_path
+        response["accessibility"] = {"alt_text": _build_alt_text(diagram_type_name, prompt)}
         return response
 
     # --- Tool: edit_diagram ---
@@ -225,11 +270,11 @@ def create_server(config_path: str | None = None) -> Any:
     async def edit_diagram(
         image_path: str,
         prompt: str,
-        provider: str = "gemini",
-        resolution: str | None = None,
+        provider: ProviderName = ProviderName.GEMINI,
+        resolution: Resolution | None = None,
         reference_images: list[str] | None = None,
         output_path: str | None = None,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """Edit an existing diagram based on instructions.
 
         Args:
@@ -241,39 +286,47 @@ def create_server(config_path: str | None = None) -> Any:
             output_path: Where to save the result
         """
         start = time.monotonic()
+        provider_name = provider.value
 
         # Load input image
-        img_path = Path(image_path).expanduser()
-        if not img_path.exists():
-            return {"status": "error", "error": f"Image not found: {image_path}"}
+        img_path, error = _validate_readable_image_path(Path(image_path), allowed_read_roots)
+        if error:
+            return {"status": "error", "error": f"Invalid image_path: {error}"}
+        assert img_path is not None
         input_image = img_path.read_bytes()
 
         # Resolve provider
-        provider_config = config.providers.get(provider)
+        provider_config = config.providers.get(provider_name)
         if not provider_config:
-            return {"status": "error", "error": f"Provider '{provider}' not configured"}
+            return {"status": "error", "error": f"Provider '{provider_name}' not configured"}
 
         api_key = resolve_api_key(provider_config)
         if not api_key:
             return {
                 "status": "error",
-                "error": f"No API key for provider '{provider}'. "
+                "error": f"No API key for provider '{provider_name}'. "
                 f"Set {provider_config.api_key_env} environment variable.",
             }
 
         # Check provider supports editing
-        img_provider = get_provider(provider, api_key, model=provider_config.model)
+        img_provider = get_provider(provider_name, api_key, model=provider_config.model)
         if "edit" not in img_provider.supported_features():
             return {
                 "status": "error",
-                "error": f"Provider '{provider}' does not support image editing",
+                "error": f"Provider '{provider_name}' does not support image editing",
             }
 
         # Build config
-        ref_paths = [Path(p).expanduser() for p in (reference_images or [])]
+        ref_paths: list[Path] = []
+        for ref in (reference_images or []):
+            ref_path, ref_error = _validate_readable_image_path(Path(ref), allowed_read_roots)
+            if ref_error:
+                return {"status": "error", "error": f"Invalid reference_images entry '{ref}': {ref_error}"}
+            assert ref_path is not None
+            ref_paths.append(ref_path)
         gen_config = GenerationConfig(
             prompt=prompt,
-            resolution=Resolution(resolution) if resolution else Resolution.RES_2K,
+            resolution=resolution or Resolution.RES_2K,
             reference_images=ref_paths,
         )
 
@@ -284,12 +337,15 @@ def create_server(config_path: str | None = None) -> Any:
         saved_path = None
         if result.success and result.image_data:
             if output_path:
-                save_to = Path(output_path).expanduser()
+                save_to, save_error = _validate_writable_image_path(
+                    Path(output_path), allowed_write_roots
+                )
+                if save_error:
+                    return {"status": "error", "error": f"Invalid output_path: {save_error}"}
+                assert save_to is not None
             else:
-                output_dir = Path(config.output_directory).expanduser()
-                output_dir.mkdir(parents=True, exist_ok=True)
                 timestamp = time.strftime("%Y%m%d_%H%M%S")
-                save_to = output_dir / f"edit_{timestamp}.png"
+                save_to = output_root / f"edit_{timestamp}.png"
 
             save_to.parent.mkdir(parents=True, exist_ok=True)
             save_to.write_bytes(result.image_data)
@@ -298,10 +354,10 @@ def create_server(config_path: str | None = None) -> Any:
         # Track cost
         cost_tracker.record(
             GenerationRecord(
-                provider=provider,
+                provider=provider_name,
                 model=provider_config.model,
                 diagram_type="edit",
-                resolution=resolution or "2K",
+                resolution=(resolution.value if resolution else "2K"),
                 cost_usd=result.cost_usd,
                 billing_model=result.billing_model.value,
                 generation_time_ms=elapsed_ms,
@@ -311,7 +367,7 @@ def create_server(config_path: str | None = None) -> Any:
             )
         )
 
-        response = _serialize(result)
+        response = cast(dict[str, Any], _serialize(result))
         response["status"] = "success" if result.success else "error"
         if saved_path:
             response["output_path"] = saved_path
@@ -320,7 +376,7 @@ def create_server(config_path: str | None = None) -> Any:
     # --- Tool: list_templates ---
 
     @app.tool()
-    async def list_templates() -> dict:
+    async def list_templates() -> dict[str, Any]:
         """List all available diagram templates with descriptions."""
         templates = load_all_templates()
         return {
@@ -343,14 +399,14 @@ def create_server(config_path: str | None = None) -> Any:
     # --- Tool: list_providers ---
 
     @app.tool()
-    async def list_providers() -> dict:
+    async def list_providers() -> dict[str, Any]:
         """List configured providers with status, models, and health information."""
         providers_info = []
         for name, pconfig in config.providers.items():
             api_key = resolve_api_key(pconfig)
             has_key = bool(api_key)
             features = []
-            if has_key and name in PROVIDER_MAP:
+            if has_key and api_key is not None and name in PROVIDER_MAP:
                 try:
                     p = get_provider(name, api_key, model=pconfig.model)
                     features = sorted(p.supported_features())
@@ -379,7 +435,7 @@ def create_server(config_path: str | None = None) -> Any:
     # --- Tool: list_styles ---
 
     @app.tool()
-    async def list_styles() -> dict:
+    async def list_styles() -> dict[str, Any]:
         """List all available style reference images."""
         styles = style_manager.list_styles()
         return {
@@ -389,7 +445,7 @@ def create_server(config_path: str | None = None) -> Any:
                     "name": s.name,
                     "display_name": s.display_name,
                     "description": s.description,
-                    "path": str(s.path),
+                    "reference_file": s.path.name,
                     "tags": s.tags,
                 }
                 for s in styles
@@ -401,9 +457,9 @@ def create_server(config_path: str | None = None) -> Any:
 
     @app.tool()
     async def get_usage_report(
-        days: int = 30,
-        group_by: str = "provider",
-    ) -> dict:
+        days: Annotated[int, Field(ge=1, le=3650)] = 30,
+        group_by: ReportGroupBy = "provider",
+    ) -> dict[str, Any]:
         """Get usage and cost report for diagram generations.
 
         Args:
@@ -420,37 +476,47 @@ def create_server(config_path: str | None = None) -> Any:
 
     @app.tool()
     async def configure_provider(
-        provider: str,
+        provider: ProviderName,
         api_key: str,
-    ) -> dict:
+    ) -> dict[str, Any]:
         """Configure an API key for a provider (sets environment variable for current session).
 
         Args:
             provider: Provider name (gemini|openai|replicate)
             api_key: The API key to set
         """
-        import os
+        if os.environ.get(ENABLE_CONFIGURE_PROVIDER_ENV) != "1":
+            return {
+                "status": "error",
+                "error": (
+                    "configure_provider is disabled by default for security. "
+                    "Set API keys via environment variables before launching the server. "
+                    f"To enable this tool intentionally, set {ENABLE_CONFIGURE_PROVIDER_ENV}=1."
+                ),
+            }
 
-        provider_config = config.providers.get(provider)
+        provider_name = provider.value
+
+        provider_config = config.providers.get(provider_name)
         if not provider_config:
-            return {"status": "error", "error": f"Unknown provider: {provider}"}
+            return {"status": "error", "error": f"Unknown provider: {provider_name}"}
 
         # Set the environment variable
         os.environ[provider_config.api_key_env] = api_key
 
         # Verify connectivity
         try:
-            img_provider = get_provider(provider, api_key, model=provider_config.model)
+            img_provider = get_provider(provider_name, api_key, model=provider_config.model)
             health = await img_provider.health_check()
             return {
                 "status": "success" if health.available else "warning",
-                "message": f"API key set for {provider} ({provider_config.api_key_env})",
+                "message": f"API key set for {provider_name} ({provider_config.api_key_env})",
                 "health": _serialize(health),
             }
         except Exception as e:
             return {
                 "status": "warning",
-                "message": f"API key set for {provider}, but health check failed: {e}",
+                "message": f"API key set for {provider_name}, but health check failed: {e}",
             }
 
     return app

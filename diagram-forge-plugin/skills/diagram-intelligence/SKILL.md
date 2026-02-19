@@ -17,7 +17,7 @@ You have access to the **diagram-forge** MCP server with these tools:
 - `list_providers` — Show configured providers and their status
 - `list_styles` — Show available style references
 - `get_usage_report` — View generation costs and usage
-- `configure_provider` — Set up an API key for a provider
+- `configure_provider` — Optional session-only API key setup (often disabled by default)
 
 ## When Triggered
 
@@ -25,7 +25,7 @@ When the user asks to create or visualize a diagram:
 
 1. **Assess the request**: Determine the diagram type (architecture, data flow, sequence, component, integration, infographic, or generic)
 
-2. **Check provider availability**: Call `list_providers` to see which providers are configured. If none have API keys, guide the user to set one up with `configure_provider` or by setting the environment variable.
+2. **Check provider availability**: Call `list_providers` to see which providers are configured. If none have API keys, guide the user to set environment variables before launching the server. Only use `configure_provider` when explicitly enabled by the operator.
 
 3. **Context gathering**: If the user wants to diagram their current project, use the Explore agent or read key files (CLAUDE.md, README, architecture docs) to understand the system.
 

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
 
 from diagram_forge.server import create_server, _serialize
 from diagram_forge.models import UsageReport
@@ -88,7 +87,7 @@ class TestServerImport:
 
     def test_providers_import(self):
         """Provider registry should import cleanly."""
-        from diagram_forge.providers import PROVIDER_MAP, get_provider
+        from diagram_forge.providers import PROVIDER_MAP
         assert "gemini" in PROVIDER_MAP
         assert "openai" in PROVIDER_MAP
         assert "replicate" in PROVIDER_MAP
@@ -99,10 +98,6 @@ class TestServerImport:
             DiagramType,
             ProviderName,
             Resolution,
-            AspectRatio,
-            GenerationConfig,
-            GenerationResult,
-            AppConfig,
         )
         assert DiagramType.ARCHITECTURE.value == "architecture"
         assert ProviderName.GEMINI.value == "gemini"

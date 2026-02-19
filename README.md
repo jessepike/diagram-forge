@@ -82,6 +82,21 @@ Or be more specific:
 
 > "Create a TOGAF-style architecture diagram showing our microservices. Use the architecture template, Gemini provider, 16:9 aspect ratio."
 
+## Setup and Customization
+
+For detailed operational setup and customization workflows, see:
+
+- `docs/setup-and-customization.md` — full setup, API keys, model/provider defaults, template editing, prompt strategy updates, style references
+- `docs/community-evaluator-guide.md` — structured external evaluator checklist and pass criteria
+
+Quick customization pointers:
+
+- **Set API keys** via environment variables (`GEMINI_API_KEY`, `OPENAI_API_KEY`, `REPLICATE_API_TOKEN`)
+- **Select default models/providers** by copying and editing `config/default_config.yaml`, then setting `DIAGRAM_FORGE_CONFIG`
+- **Override model per run** with `generate_diagram(..., provider=\"openai\", model=\"gpt-image-1.5\")`
+- **Modify templates** in `src/diagram_forge/templates/*.yaml` (`prompt_template`, `style_defaults`, `color_system`, `recommended_provider`)
+- **Tune prompt rendering behavior** in `src/diagram_forge/template_engine.py`
+
 ## MCP Tools
 
 | Tool | Description |
@@ -92,7 +107,7 @@ Or be more specific:
 | `list_providers` | Show configured providers, API key status, and supported features |
 | `list_styles` | List available style reference images |
 | `get_usage_report` | View generation costs and usage stats by provider, type, or day |
-| `configure_provider` | Set up an API key for a provider (session-only) |
+| `configure_provider` | Optional session-only key setup (disabled by default for security) |
 
 ## Diagram Types
 
@@ -117,6 +132,21 @@ generate_diagram(prompt="...", style_reference="c4-container")
 ```
 
 Save your own styles to `~/.diagram-forge/styles/<name>/reference.png` with an optional `style.yaml` for metadata.
+For security, direct style file paths are only allowed from the current workspace, configured styles directory, or output directory.
+
+### Security Defaults
+
+- API keys should be provided through environment variables before server startup.
+- `configure_provider` is disabled by default to avoid secret leakage in tool-call logs.
+- Output writes are restricted to `~/.diagram-forge/output` by default.
+- Input image reads are restricted to current workspace + Diagram Forge directories and support image files only.
+- Replicate output downloads are validated for `https` and trusted hostnames with a max download size.
+
+Enable `configure_provider` only if needed:
+
+```bash
+export DIAGRAM_FORGE_ENABLE_CONFIGURE_PROVIDER=1
+```
 
 ### Auto Provider Selection
 

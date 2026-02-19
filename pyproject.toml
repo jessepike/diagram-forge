@@ -56,3 +56,7 @@ python_version = "3.11"
 strict = true
 warn_unused_configs = true
 mypy_path = "src"
+
+[[tool.mypy.overrides]]
+module = ["yaml"]
+ignore_missing_imports = true

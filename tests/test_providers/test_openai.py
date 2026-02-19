@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import pytest
 
-from diagram_forge.models import GenerationConfig, Resolution
+from diagram_forge.models import GenerationConfig
 from diagram_forge.providers.openai_provider import OpenAIProvider
 
 

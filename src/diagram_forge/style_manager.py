@@ -20,7 +20,7 @@ class StyleManager:
 
     def list_styles(self) -> list[StyleReference]:
         """List all available style references."""
-        styles = []
+        styles: list[StyleReference] = []
         styles.extend(self._scan_directory(self.bundled_dir, source="bundled"))
         if self.user_dir and self.user_dir.exists():
             styles.extend(self._scan_directory(self.user_dir, source="user"))
@@ -49,7 +49,7 @@ class StyleManager:
 
     def _scan_directory(self, directory: Path, source: str = "") -> list[StyleReference]:
         """Scan a directory for style reference images."""
-        styles = []
+        styles: list[StyleReference] = []
         if not directory.exists():
             return styles
 
@@ -69,9 +69,9 @@ class StyleManager:
 
             if not ref_image:
                 # Take first image found
-                for f in style_dir.iterdir():
-                    if f.suffix.lower() in image_extensions:
-                        ref_image = f
+                for image_file in style_dir.iterdir():
+                    if image_file.suffix.lower() in image_extensions:
+                        ref_image = image_file
                         break
 
             if not ref_image:
@@ -80,8 +80,8 @@ class StyleManager:
             # Load metadata if available
             meta_path = style_dir / "style.yaml"
             if meta_path.exists():
-                with open(meta_path) as f:
-                    meta = yaml.safe_load(f) or {}
+                with open(meta_path) as meta_file:
+                    meta = yaml.safe_load(meta_file) or {}
             else:
                 meta = {}
 

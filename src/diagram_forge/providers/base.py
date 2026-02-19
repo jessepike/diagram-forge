@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from typing import Any
 
 from diagram_forge.models import (
     BillingModel,
@@ -19,10 +20,10 @@ class BaseImageProvider(ABC):
     Each provider implements generate, edit, health_check, pricing, and feature reporting.
     """
 
-    def __init__(self, api_key: str, model: str | None = None, **kwargs):
+    def __init__(self, api_key: str, model: str | None = None, **kwargs: Any):
         self.api_key = api_key
         self.model = model or self.default_model()
-        self.extra = kwargs
+        self.extra: dict[str, Any] = kwargs
 
     @abstractmethod
     def default_model(self) -> str:
