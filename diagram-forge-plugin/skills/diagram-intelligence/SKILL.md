@@ -52,3 +52,25 @@ When the user asks to create or visualize a diagram:
 - For architecture diagrams, organize components into named layers
 - For data flow, specify swim lanes and arrow directions
 - Include a legend for any color coding used
+
+## High-Quality Diagram Rules (from AFAS reference diagrams)
+
+These rules produced the highest-quality outputs in the AFAS series. Apply generally:
+
+1. **Name every element verbatim** — don't say "show inputs." List each input box by name.
+2. **Specify the style reference image** — it anchors the visual grammar. Use `list_styles` to find the best match.
+3. **Write the tagline text in the prompt** — the model can't guess your best closing line.
+4. **Use the full style boilerplate every time** — don't abbreviate color/font specs.
+5. **Describe layout structure first** (columns, rings, flow direction), then fill with content.
+6. **Use dashed boundaries for optional/separate/isolated elements** — the model renders them correctly when specified explicitly.
+7. **Constrain color use explicitly** — name which elements get which hex codes.
+8. **Specify `aspect_ratio: 16:9` and `resolution: 2K`** — never leave these to defaults for production diagrams.
+
+## Style Reference Matching Guide
+
+| Diagram Type | Best Style Reference |
+|---|---|
+| Circular / ring / loop / cycle | `afas-control-plane-loop` |
+| Spectrum / progression / three-column | `afas-escalation-spectrum` |
+| Blueprint / flow / layered | `c4-container` or `data-flow` |
+| Executive summary / infographic | `exec-infographic` |
