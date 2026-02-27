@@ -1,11 +1,25 @@
 # Diagram Forge — Status
 
-## Current State: Operate & Improve — Web UI Planning Started
-- ADF Stage: O&I (MCP server); Discover (Web UI — not yet started)
+## Current State: Web UI — Design Stage
+- ADF Stage: O&I (MCP server); **Design** (Web UI)
 - Monorepo: MCP server + Claude Code plugin in single repo
 - All 52 tests passing
 - GitHub repo: https://github.com/jessepike/diagram-forge
 - Templates: 13 (up from 9) — added product_roadmap, workstreams, kanban, brand_infographic
+
+## Discover Stage — Complete (2026-02-27)
+
+**Produced:**
+- `docs/adf/intent.md` — North Star: open diagram-forge to non-MCP users via web UI
+- `docs/adf/discover-brief.md` — v0.3, passed internal (2 cycles) + external review (GPT + Kimi)
+
+**Key decisions locked:**
+- BYOK API keys (Gemini/OpenAI), passed per-request, never persisted
+- Next.js (Vercel) + FastAPI (Railway) — reuse existing Python code
+- Anonymous v1, no auth, no persistence
+- PNG output, 10MB file upload limit
+
+**Read order for Design:** `intent.md` → `discover-brief.md` → this file
 
 ## What's Done
 - [x] Project structure (src layout, pyproject.toml, MIT license)
@@ -31,7 +45,7 @@
 - 2026-02-27: Completed Web UI Discover exploration + internal review (2 cycles, 0 open Critical/High issues)
 
 ## Next Steps
-- [ ] Web UI — Phase 2 external review (submit brief to GPT/Gemini), then Design stage
+- [ ] Web UI — Design stage: Intake & Clarification → design.md → review
 - [ ] B1: Restore recommended_provider/model fields to new templates
 - [ ] B2: Test remaining templates (architecture, component, sequence, integration, infographic)
 - [ ] B13: Publish to PyPI (`pip install diagram-forge`)
