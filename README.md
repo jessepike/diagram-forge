@@ -12,7 +12,7 @@ Instead of wrestling with diagramming tools or manually crafting image generatio
 
 ## Features
 
-- **9 diagram templates** — Architecture (TOGAF), C4 Container, Executive Infographic, data flow, component, sequence, integration, infographic, and generic
+- **13 diagram templates** — Architecture (TOGAF), C4 Container, Executive Infographic, data flow, component, sequence, integration, infographic, generic, product roadmap, workstreams, kanban, and brand infographic
 - **3 image providers** — Google Gemini (recommended), OpenAI (GPT Image), Replicate (Flux)
 - **Auto provider selection** — Each template recommends the best provider/model for its diagram type
 - **Template-driven prompts** — YAML templates with hex-coded color systems, explicit rendering instructions, and layout rules
@@ -106,6 +106,10 @@ Or be more specific:
 | `sequence` | Sequence Diagram | Request flows, protocol interactions |
 | `integration` | Integration / Connection Map | System connections, API landscape |
 | `infographic` | Infographic / Learning Card | Concept explanations, overviews |
+| `product_roadmap` | Product Roadmap | Phase pipelines, gate icons, status badges |
+| `workstreams` | Workstreams / Priority Lanes | Swimlane planning with status and dependencies |
+| `kanban` | Kanban Board | Three-column task boards with category color bars |
+| `brand_infographic` | Brand Infographic | Investor/marketing slides with brand aesthetic |
 | `generic` | Custom / Freeform | Anything else |
 
 ### Style References
@@ -137,7 +141,7 @@ To use, install the plugin or add the `.mcp.json` from the plugin directory.
 
 ## How It Works
 
-1. **Template selection** — Matches your request to one of 9 YAML templates, each encoding proven prompt patterns (color systems, layer organization, legibility rules)
+1. **Template selection** — Matches your request to one of 13 YAML templates, each encoding proven prompt patterns (color systems, layer organization, legibility rules)
 2. **Prompt rendering** — Merges your description with the template, substituting variables and applying style defaults
 3. **Provider dispatch** — Sends the engineered prompt to your chosen provider (Gemini, OpenAI, or Replicate)
 4. **Image handling** — Saves the generated image, records cost and metadata to SQLite
@@ -186,7 +190,7 @@ src/diagram_forge/
     gemini.py            # Google Gemini
     openai_provider.py   # OpenAI GPT Image
     replicate_provider.py # Replicate Flux
-  templates/             # 9 YAML prompt templates
+  templates/             # 13 YAML prompt templates
 ```
 
 ## License
