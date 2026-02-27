@@ -1,9 +1,9 @@
 ---
 type: "brief"
 project: "Diagram Forge Web UI"
-version: "0.2"
+version: "0.3"
 status: "in-review"
-review_cycle: 2
+review_cycle: 3
 created: "2026-02-27"
 updated: "2026-02-27"
 intent_ref: "./intent.md"
@@ -27,7 +27,7 @@ Diagram Forge's 13 professional diagram templates are only accessible via MCP cl
 ### In Scope
 - Template picker — all 13 templates with name, description, and use case
 - Content input — text/markdown paste and file upload (PDF, DOCX, MD)
-- BYOK API key entry — Gemini or OpenAI, stored in browser session only, never persisted server-side
+- BYOK API key entry — Gemini or OpenAI, entered in browser, passed per-request to backend (in-memory only), never logged or persisted server-side
 - Provider selection — Gemini, OpenAI, or auto
 - Generate → view → regenerate → download PNG
 - Anonymous use — no login required
@@ -43,7 +43,7 @@ Diagram Forge's 13 professional diagram templates are only accessible via MCP cl
 
 ## Success Criteria
 
-- [ ] A non-technical colleague uses the app to produce a usable diagram without any instructions from me
+- [ ] A colleague (provided an API key) produces a usable diagram without any instructions from me
 - [ ] At least 3 people outside my immediate network discover and use the app within 30 days of launch
 - [ ] At least 1 person asks unprompted whether they can pay for it or get more usage
 
@@ -55,6 +55,7 @@ Diagram Forge's 13 professional diagram templates are only accessible via MCP cl
 - Anonymous in v1 — no auth infrastructure
 - Deploy targets: Vercel (frontend) and Railway (Python API backend)
 - Budget: free tiers where possible; Railway ~$5/month acceptable for prototype
+- File upload size limit: max 10MB per file to ensure stable operation within Railway memory constraints
 
 ## Technical Preferences
 
@@ -65,7 +66,9 @@ Diagram Forge's 13 professional diagram templates are only accessible via MCP cl
 - **Deployment:** Vercel (frontend) + Railway (backend API)
 - **No database in v1** — stateless, no persistence needed
 
-*Key architecture question deferred to Design: how the Next.js frontend authenticates to the Railway API (shared secret is acceptable for prototype).*
+*Key architecture question deferred to Design: Next.js API routes (server-side) authenticate to the Railway API via a shared secret env var — this secret lives server-side only and is never shipped to the browser.*
+
+*Output: the existing diagram-forge backend returns PNG bytes (image generation APIs return image data, saved to disk or returned as bytes). The frontend renders this as an image preview and offers a download link.*
 
 ## Open Questions
 
@@ -100,6 +103,12 @@ Diagram Forge's 13 professional diagram templates are only accessible via MCP cl
 | 9 | Missing Decision Log | Ralph-Internal | Low | Resolved | Added Decision Log with 4 key decisions from exploration |
 | 10 | "personal → community" notation ambiguous | Ralph-Internal | Low | Resolved | Clarified as "(v1) → community (post-validation)" |
 | 11 | Success criterion #1 assumes user can obtain an API key — non-trivial for non-technical users | Ralph-Internal | Low | Deferred | Acknowledged as prototype constraint; BYOK is intentional v1 filter |
+| 12 | BYOK key flow ambiguous — "never persisted server-side" conflicts with backend handling key | GPT / Kimi | High | Resolved | Clarified: key passed per-request to backend in-memory, never logged/stored |
+| 13 | Success criterion #1 "non-technical colleague" misaligned with BYOK requirement | Kimi | High | Resolved | Reworded to "colleague (provided an API key)" |
+| 14 | Per-request API key assumption unverified — code may be env-var only | Kimi | High | Resolved (N/A) | Verified: `get_provider(name, api_key)` factory already accepts runtime keys |
+| 15 | Output format not pinned — Design needs to know what backend returns | GPT | Medium | Resolved | Stated in Technical Preferences: backend returns PNG bytes |
+| 16 | Shared secret exposed if used browser-side | GPT | Medium | Resolved | Clarified: shared secret is server-side only (Next.js API routes → Railway) |
+| 17 | File size limits not specified — Railway $5 tier may OOM on large files | Kimi | Medium | Resolved | Added 10MB file size limit to Constraints |
 
 ## Review Log
 
@@ -121,9 +130,21 @@ Diagram Forge's 13 professional diagram templates are only accessible via MCP cl
 - Logged only (1 issue): Issue #11 — API key acquisition assumption (Low) — deferred with rationale
 **Outcome:** Exit criteria met. Ready for Phase 2 (external review).
 
+### Phase 2: External Review
+
+**Date:** 2026-02-27
+**Reviewers:** GPT (gpt-5.2), Kimi (kimi-k2.5) — Gemini rate-limited
+**Issues Found:** 3 High (cross-reviewer consensus on 1), 3 Medium
+**Actions Taken:**
+- Auto-fixed (6 issues): All High and Medium issues resolved
+- Closed as N/A (1 issue): Issue #14 — per-request API key already supported in codebase
+**Cross-Reviewer Consensus:** BYOK key flow ambiguity flagged independently by both GPT and Kimi (different angles, same root concern) — confirmed P1
+**Outcome:** 0 open Critical or High issues. Brief ready for Design handoff.
+
 ## Revision History
 
 | Version | Date | Changes |
 |---|---|---|
 | 0.1 | 2026-02-27 | Initial draft from exploration session |
 | 0.2 | 2026-02-27 | Cycle 1 review — added frontmatter, Summary, Issue Log, Decision Log; sharpened success criteria; fixed classification; removed session state; scoped tech stack to preferences |
+| 0.3 | 2026-02-27 | External review — clarified BYOK key flow, pinned output format, fixed success criterion wording, added file size limit, clarified shared secret scope |
