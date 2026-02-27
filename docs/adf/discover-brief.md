@@ -1,111 +1,129 @@
-# Discover Brief — Diagram Forge Web UI
+---
+type: "brief"
+project: "Diagram Forge Web UI"
+version: "0.2"
+status: "in-review"
+review_cycle: 2
+created: "2026-02-27"
+updated: "2026-02-27"
+intent_ref: "./intent.md"
+---
+
+# Brief: Diagram Forge Web UI
 
 ## Classification
-`App · personal → community · mvp · standalone`
 
-## Problem Statement
+- **Type:** App
+- **Scale:** personal (v1) → community (post-validation)
+- **Scope:** mvp
+- **Complexity:** multi-component (Next.js frontend + Python API backend)
 
-Diagram Forge's 13 professional diagram templates and AI generation pipeline are only accessible via MCP clients. Non-technical users — PMs, designers, executives, clients — are entirely excluded. The web UI removes that barrier: select a template, provide content, generate a diagram.
+## Summary
 
-## Target Users
+Diagram Forge's 13 professional diagram templates are only accessible via MCP clients, excluding most potential users. This project builds a web application that exposes the same generation capability through a browser UI — users select a template, provide content (text or file), enter their own API key, and download the result. See `intent.md` for the North Star. The v1 prototype validates usability and demand before committing to a hosted-key model that would open access to fully non-technical users.
 
-**Primary (v1):** Technical-adjacent users who have a Gemini or OpenAI API key but don't use MCP clients. Colleagues, collaborators, developers on non-MCP editors.
+## Scope
 
-**Secondary (future):** Non-technical users once a hosted key option is added.
+### In Scope
+- Template picker — all 13 templates with name, description, and use case
+- Content input — text/markdown paste and file upload (PDF, DOCX, MD)
+- BYOK API key entry — Gemini or OpenAI, stored in browser session only, never persisted server-side
+- Provider selection — Gemini, OpenAI, or auto
+- Generate → view → regenerate → download PNG
+- Anonymous use — no login required
 
-**Out of scope (v1):** End consumers with no API knowledge. That requires a hosted key and is a v2 decision.
-
-## Core User Flow
-
-```
-1. Open app (no login required)
-2. Select a template from the 13 available
-3. Paste text/markdown OR upload a file (PDF, DOCX, MD)
-4. Enter API key (Gemini or OpenAI) — stored in browser session only
-5. Click Generate
-6. View generated diagram
-7. Regenerate (same prompt, new output) OR Download PNG
-```
+### Out of Scope (v1)
+- User accounts / authentication — adds complexity, not needed to validate core UX
+- Diagram history or saved gallery — no persistence in v1
+- Sharing / collaboration — v2 when demand is validated
+- Payment or billing — v2 when demand signal is confirmed
+- Hosted API key — v2; requires rate limiting and cost management infrastructure
+- Style reference upload — v2
+- Edit/iterate on existing diagram — v2
 
 ## Success Criteria
 
-In priority order:
-1. **Usability:** A non-technical teammate can produce a diagram with zero hand-holding
-2. **Traction:** Someone outside the creator's network finds and uses it organically
-3. **Demand signal:** At least one unsolicited request to pay for it
-
-## MVP Scope
-
-### In
-- Template picker — all 13 templates with name, description, use case
-- Content input — text/markdown paste + file upload (PDF, DOCX, MD)
-- BYOK API key input — Gemini or OpenAI, stored in browser session only
-- Generate → view → regenerate → download PNG
-- Provider selection (Gemini / OpenAI) or auto
-- Anonymous — no login required
-
-### Out (v1)
-- User accounts / authentication
-- Diagram history or saved gallery
-- Sharing / collaboration features
-- Payment or billing
-- Hosted API key (v2 when demand is validated)
-- Style reference upload (v2)
-- Edit/iterate on existing diagram (v2)
-
-## Tech Stack
-
-| Layer | Technology | Rationale |
-|---|---|---|
-| Frontend | Next.js (React) | User preference, Vercel-native |
-| Frontend hosting | Vercel | Simple deploy, free tier |
-| Backend API | FastAPI (Python) on Railway | Reuses diagram-forge Python code directly |
-| Backend hosting | Railway | User has account, cheap, good Python support |
-| Database | None (v1) | No persistence needed |
-| Auth | None (v1) | Anonymous |
-
-### Key Architecture Decision
-The diagram-forge MCP server Python code is wrapped by a thin FastAPI layer on Railway. The Next.js frontend calls this API. No Python rewrite — the template engine, provider clients, and prompt logic are reused as-is.
-
-API key is submitted by the user on each session and passed through to the backend. Never persisted server-side.
-
-## Design Direction
-
-**Aesthetic:** Linear × Zed IDE × Todoist — dark, minimal, high contrast, nothing loud or bright.
-
-- Dark background (not pitch black — Zed-style dark gray)
-- Minimal color — muted accent, not neon
-- Clean typography, no visual clutter
-- Diagrams are the hero — UI gets out of the way
-- Professional and focused, not flashy
-
-## Open Questions
-
-| Question | Status | Notes |
-|---|---|---|
-| Repo structure — monorepo or separate repo? | Open | Monorepo (web/ subdir) vs. new repo `diagram-forge-web` |
-| API key UX — where does user enter it? | Open | Settings panel, inline prompt, or per-generation modal |
-| File upload text extraction — library choice | Open | PyMuPDF for PDF, python-docx for DOCX |
-| Error UX — what happens on failed generation? | Open | Retry button, error message, or inline feedback |
-| Railway API auth — how does Next.js authenticate to Railway API? | Open | Simple shared secret / env var for prototype |
+- [ ] A non-technical colleague uses the app to produce a usable diagram without any instructions from me
+- [ ] At least 3 people outside my immediate network discover and use the app within 30 days of launch
+- [ ] At least 1 person asks unprompted whether they can pay for it or get more usage
 
 ## Constraints
 
-- Prototype mindset — ship fast, validate, don't over-engineer
-- Reuse diagram-forge Python code — no core logic rewrite
-- BYOK only in v1 — no backend cost exposure
-- Anonymous — no auth infrastructure in v1
-- Budget: minimal — Railway free tier + Vercel free tier where possible
+- Prototype mindset — validate demand before investing in production infrastructure
+- BYOK only in v1 — no backend API cost exposure until demand is confirmed
+- Reuse existing diagram-forge Python code — no rewrite of core template or provider logic
+- Anonymous in v1 — no auth infrastructure
+- Deploy targets: Vercel (frontend) and Railway (Python API backend)
+- Budget: free tiers where possible; Railway ~$5/month acceptable for prototype
 
-## Session State
+## Technical Preferences
 
-- **Phase:** Crystallization complete
-- **Last action:** Discover brief drafted from exploration session (2026-02-27)
-- **Next step:** Review loop — Ralph Loop internal review, then external model review
-- **Blockers:** None
+*Preferences captured in Discover to inform Design. Architecture decisions made in Design.*
+
+- **Frontend:** Next.js (React) — user preference, Vercel-native
+- **Backend:** Thin Python API wrapping existing diagram-forge code — preserves all existing logic
+- **Deployment:** Vercel (frontend) + Railway (backend API)
+- **No database in v1** — stateless, no persistence needed
+
+*Key architecture question deferred to Design: how the Next.js frontend authenticates to the Railway API (shared secret is acceptable for prototype).*
+
+## Open Questions
+
+| Question | Priority | Notes |
+|---|---|---|
+| Monorepo vs. separate repo (`diagram-forge-web`)? | High | Impacts project structure — decide before Design begins |
+| API key UX — where does user enter it? | Medium | Settings panel, inline prompt, or per-generation modal |
+| File upload text extraction — library choice | Medium | PyMuPDF for PDF, python-docx for DOCX — confirm in Design |
+| Error UX — what happens on failed generation? | Medium | Retry, error message, or inline feedback |
+
+## Decision Log
+
+| Decision | Options Considered | Chosen | Rationale | Date |
+|---|---|---|---|---|
+| API key model | BYOK / hosted key / hybrid | BYOK first | Zero cost risk for prototype; validates demand before investment | 2026-02-27 |
+| Backend runtime | TypeScript port / Python on Railway / Vercel Python runtime | Python on Railway | Reuses existing code; Railway is simple; no rewrite risk | 2026-02-27 |
+| Frontend stack | Next.js / SvelteKit | Next.js | User preference, Vercel-native, largest ecosystem | 2026-02-27 |
+| Auth in v1 | Auth required / anonymous | Anonymous | Reduces complexity; BYOK acts as a natural access filter | 2026-02-27 |
+
+## Issue Log
+
+| # | Issue | Source | Severity | Status | Resolution |
+|---|---|---|---|---|---|
+| 1 | Missing YAML frontmatter | Ralph-Internal | Critical | Resolved | Added frontmatter with status, version, review_cycle |
+| 2 | Missing Summary section | Ralph-Internal | Critical | Resolved | Added Summary section |
+| 3 | Missing Issue Log section | Ralph-Internal | Critical | Resolved | Added this section |
+| 4 | Success criteria 2 & 3 not measurable | Ralph-Internal | Critical | Resolved | Added "3 users in 30 days" and "1 unprompted pay request" thresholds |
+| 5 | BYOK/non-technical tension not acknowledged | Ralph-Internal | High | Resolved | Added to Summary: v1 validates UX before hosting; BYOK is intentional prototype filter |
+| 6 | Tech stack too detailed for Discover | Ralph-Internal | High | Resolved | Replaced with "Technical Preferences" section, noted as Design inputs |
+| 7 | Session State embedded in Brief | Ralph-Internal | High | Resolved | Removed; session state tracked in status.md only |
+| 8 | Classification format non-standard | Ralph-Internal | High | Resolved | Reformatted to spec-compliant structured fields |
+| 9 | Missing Decision Log | Ralph-Internal | Low | Resolved | Added Decision Log with 4 key decisions from exploration |
+| 10 | "personal → community" notation ambiguous | Ralph-Internal | Low | Resolved | Clarified as "(v1) → community (post-validation)" |
+| 11 | Success criterion #1 assumes user can obtain an API key — non-trivial for non-technical users | Ralph-Internal | Low | Deferred | Acknowledged as prototype constraint; BYOK is intentional v1 filter |
+
+## Review Log
+
+### Phase 1: Internal Review
+
+**Date:** 2026-02-27
+**Mechanism:** Manual (Ralph Loop unavailable — script error)
+**Cycle:** 1
+**Issues Found:** 4 Critical, 4 High, 2 Low
+**Actions Taken:**
+- Auto-fixed (10 issues): All Critical and High issues resolved in this cycle; Low issues also resolved
+**Outcome:** All Critical and High issues resolved. Proceeding to Cycle 2.
+
+### Cycle 2
+
+**Date:** 2026-02-27
+**Issues Found:** 0 Critical, 0 High, 1 Low
+**Actions Taken:**
+- Logged only (1 issue): Issue #11 — API key acquisition assumption (Low) — deferred with rationale
+**Outcome:** Exit criteria met. Ready for Phase 2 (external review).
 
 ## Revision History
 
-| Date | Change |
-|---|---|
-| 2026-02-27 | Initial draft from exploration session |
+| Version | Date | Changes |
+|---|---|---|
+| 0.1 | 2026-02-27 | Initial draft from exploration session |
+| 0.2 | 2026-02-27 | Cycle 1 review — added frontmatter, Summary, Issue Log, Decision Log; sharpened success criteria; fixed classification; removed session state; scoped tech stack to preferences |
