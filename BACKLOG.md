@@ -85,6 +85,29 @@
 - **Status:** Pending
 - **Details:** Show the fully rendered prompt without generating an image. Helps users debug template variable substitution and understand what gets sent to the provider. Zero cost.
 
+### B16: Auto-regeneration hook (file-watch triggered)
+- **Priority:** P2
+- **Status:** Pending
+- **Details:** PostToolUse or file-watch hook that detects when source markdown files (e.g. workstreams.md, roadmap.md) are saved and queues diagram regeneration. Could be a Claude Code hook or a lightweight file watcher script. Goal: diagrams stay in sync with flat files without manual `/diagrams` invocation. Daily or on-save trigger options. First validated in EvenGround project.
+- **Acceptance:** Saving a source file triggers regeneration of dependent diagrams. User can opt-in per project.
+
+### B17: brand_infographic template
+- **Priority:** P2
+- **Status:** Template YAML written (2026-02-27) — needs testing and baseline style reference
+- **Details:** New template for investor/marketing slides with warm brand aesthetic (cream background, serif headlines, organic decoration, brand color palette). Designed to work with project-specific brand style references. Tested first with EvenGround brand style reference.
+- **Template file:** `src/diagram_forge/templates/brand_infographic.yaml`
+- **Acceptance:** Generates investor-quality slides that match a provided brand style reference
+
+### B18: PM diagram templates (product_roadmap, workstreams, kanban)
+- **Priority:** P2
+- **Status:** Templates written and live (2026-02-27) — validated with EvenGround project
+- **Details:** Three new templates for product/project management diagrams. Fills a major gap — Diagram Forge had no PM-native templates before this. All three validated with real project content and iterated to production quality.
+  - `product_roadmap` — phase pipeline with gate icons, status badges, expansion banner
+  - `workstreams` — priority swimlanes with status, items, dependency notes
+  - `kanban` — three-column board with category color bars, no-duplicate guard
+- **Style references:** `minimal-app-ui`, `minimal-kanban`, `product-roadmap-status` saved as baselines
+- **Acceptance:** Already complete — add to README, update template count
+
 ## Completed
 
 ### B0: Template v2 upgrade

@@ -1,0 +1,72 @@
+name: workstreams
+display_name: "Workstreams / Swimlane Overview"
+description: "Horizontal swimlane rows showing parallel workstreams with priority, status, active items, and dependencies"
+version: "1.0"
+supports:
+  - workstreams
+  - swimlane
+  - project_status
+  - kanban_overview
+
+style_defaults:
+  background: "white"
+  font: "bold sans-serif"
+  corners: "rounded"
+  borders: "subtle (rows separated by light gray lines)"
+  aspect_ratio: "16:9"
+
+color_system:
+  description: "Status badge colors indicate workstream state"
+  palette:
+    in_progress: "#2E7DD1 (blue) — actively being worked"
+    ready: "#F59E0B (amber) — ready to start, waiting on dependency"
+    parallel: "#0D9488 (teal) — running in parallel with other streams"
+    queued: "#64748B (slate gray) — queued, not yet started"
+    ongoing: "#16A34A (green) — continuous background stream"
+    blocked: "#DC2626 (red) — blocked, needs resolution"
+
+prompt_template: |
+  Create a professional workstreams swimlane diagram.
+
+  CRITICAL RENDERING INSTRUCTIONS:
+  - Flat 2D — NO shadows, NO gradients, NO 3D effects
+  - All text LARGE and bold — title 28pt, stream names 14pt bold, items 11pt
+  - Each row is a horizontal swimlane with a light colored left bar indicating stream
+  - Status badges are pill-shaped with colored fill and white text
+  - {style_defaults_block}
+
+  STATUS COLORS:
+  {color_system_block}
+
+  Each swimlane row has FOUR sections left to right:
+  1. Priority badge (#1, #2...) + Stream name — left column, ~15% width
+  2. Color bar strip on far left edge of row (stream's accent color)
+  3. Status badge + Active items (2 columns of bullets) — center, ~55% width
+  4. Dependency / blocker note — right column, ~30% width, smaller italic text
+
+  TITLE: {title}
+  SUBTITLE (below title, smaller): {subtitle}
+
+  WORKSTREAM ROWS (top to bottom, in priority order):
+  {streams_block}
+
+  LEGEND (bottom-right):
+  {legend_block}
+
+  LAYOUT RULES:
+  - Rows stack vertically, equal height, separated by thin gray lines
+  - Priority numbers in bold circular badges on left
+  - Status badges left-aligned in center column
+  - Active items as compact bullet lists beside/below status badge
+  - Dependency notes right-aligned, smaller font, italic
+  - All text horizontal and perfectly legible
+  - Zebra-stripe rows lightly (alternating white / very light gray) for readability
+
+  Clean, professional project management style.
+  {aspect_ratio} aspect ratio. {resolution} resolution.
+
+variables:
+  title: "Required. Diagram title."
+  subtitle: "Optional. Subtitle shown below title (e.g. current sprint or date)."
+  streams_block: "Required. Workstream definitions with priority, name, status, active items, color, and dependency note."
+  legend_block: "Optional. Auto-generated from color_system if not provided."

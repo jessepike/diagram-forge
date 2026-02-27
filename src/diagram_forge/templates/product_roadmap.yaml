@@ -1,0 +1,72 @@
+name: product_roadmap
+display_name: "Product Roadmap"
+description: "Left-to-right product phase pipeline with gate icons, status badges, and expansion banner"
+version: "1.0"
+supports:
+  - product_roadmap
+  - roadmap
+  - phases
+  - milestones
+
+style_defaults:
+  background: "white"
+  font: "bold sans-serif"
+  corners: "rounded"
+  borders: "none (boxes use colored fills)"
+  aspect_ratio: "16:9"
+
+color_system:
+  description: "Status-only coloring — 3 colors max. Color encodes state, not decoration."
+  palette:
+    complete: "#4CAF82 (muted green, white text) — phase fully shipped"
+    in_progress: "#2E7DD1 (brand blue, white text) — currently being built"
+    planned: "#F3F4F6 (neutral light gray, #111827 dark text) — all future/planned phases"
+    expansion: "#1A237E (dark navy, white text) — post-core expansion banner only"
+
+prompt_template: |
+  Create a professional product roadmap diagram.
+
+  CRITICAL RENDERING INSTRUCTIONS:
+  - Flat 2D — NO shadows, NO gradients, NO 3D effects
+  - All text LARGE and bold — title 28pt, phase names 16pt bold, subtitles 11pt, bullets 10pt
+  - Phase boxes are rounded rectangles with colored fills and white text
+  - Phases connect left-to-right with thick dark arrows
+  - Between each phase: a small diamond gate icon (◆) labeled "Gate" in dark gray
+  - {style_defaults_block}
+
+  COLOR SYSTEM (phase boxes colored by status):
+  {color_system_block}
+
+  Each phase box contains:
+  - Phase name (top, bold, large)
+  - Status badge top-right corner (e.g. ✓ COMPLETE, ◉ IN PROGRESS)
+  - Subtitle (smaller, italic — gate condition or description)
+  - Bullet list of key features/deliverables (small, readable)
+
+  TITLE: {title}
+
+  PHASES (left to right — single horizontal row, no grid, no empty cells):
+  {phases_block}
+
+  EXPANSION BANNER (full-width dark navy bar below the phase row):
+  {expansion_block}
+
+  LEGEND (bottom-right, small):
+  {legend_block}
+
+  LAYOUT RULES:
+  - All phases in ONE horizontal row — never wrap to a second row
+  - Gate diamonds between every adjacent phase pair
+  - Expansion banner spans full width below all phases
+  - Status badges in top-right corner of each box
+  - All text horizontal and perfectly legible
+  - Consistent box widths — do not let any phase box dominate
+
+  Clean, investor-quality presentation diagram.
+  {aspect_ratio} aspect ratio. {resolution} resolution.
+
+variables:
+  title: "Required. Diagram title."
+  phases_block: "Required. Phase definitions with name, status, subtitle, color, and bullet items."
+  expansion_block: "Optional. Full-width expansion banner content below main phases."
+  legend_block: "Optional. Auto-generated from color_system if not provided."

@@ -1,0 +1,81 @@
+name: kanban
+display_name: "Kanban Board"
+description: "Three-column kanban board with color-coded category cards, count badges, and legend"
+version: "1.0"
+supports:
+  - kanban
+  - backlog
+  - sprint_board
+  - task_board
+
+style_defaults:
+  background: "white"
+  font: "bold sans-serif"
+  corners: "rounded"
+  borders: "subtle card borders with colored left bar per category"
+  aspect_ratio: "16:9"
+
+color_system:
+  description: "Left bar color on each card indicates task category — defined per diagram"
+  palette:
+    todo_header: "#F1F5F9 (light gray) — To Do column header"
+    in_progress_header: "#DBEAFE (light blue) — In Progress column header"
+    done_header: "#DCFCE7 (light green) — Done column header"
+
+prompt_template: |
+  Create a professional Kanban board diagram.
+
+  CRITICAL RENDERING INSTRUCTIONS:
+  - Flat 2D — NO shadows, NO gradients, NO 3D effects
+  - All text LARGE — title 24pt bold, column headers 16pt bold uppercase, card titles 13pt bold, subtitles 10pt
+  - Three equal-width columns side by side
+  - Column headers are colored bands at top of each column with item count badge
+  - Cards are white rounded rectangles with a colored LEFT BORDER (4px) indicating category
+  - Cards have subtle 1px gray outer border
+  - {style_defaults_block}
+
+  COLUMN COLORS:
+  {color_system_block}
+
+  Each card contains:
+  - Card title (bold, 13pt)
+  - Subtitle / description (smaller, 10pt, gray)
+  - Colored left border (4px) for category
+
+  TITLE: {title}
+  SUBTITLE (below title, smaller italic): {subtitle}
+
+  COLUMN 1 — TO DO:
+  Header: light gray (#F1F5F9), label "TO DO" with count badge
+  {todo_block}
+
+  COLUMN 2 — IN PROGRESS:
+  Header: light blue (#DBEAFE), label "IN PROGRESS" with count badge
+  {in_progress_block}
+
+  COLUMN 3 — DONE:
+  Header: light green (#DCFCE7), label "DONE" with count badge
+  {done_block}
+
+  CATEGORY LEGEND (bottom center):
+  Colored dots only (NO hex codes) — one dot per category with label
+  {legend_block}
+
+  LAYOUT RULES:
+  - Three columns exactly equal width, spanning full diagram width
+  - Cards stack vertically within each column with small gap between them
+  - Empty columns show centered placeholder text in light gray italic
+  - Count badges are small pill shapes beside column header label
+  - CRITICAL: Each card appears EXACTLY ONCE — never duplicate any card across columns
+  - All text horizontal and perfectly legible
+
+  Clean, modern project management style.
+  {aspect_ratio} aspect ratio. {resolution} resolution.
+
+variables:
+  title: "Required. Board title."
+  subtitle: "Optional. Subtitle (e.g. sprint name, gate condition)."
+  todo_block: "Required. Cards in the To Do column with title, subtitle, and category color."
+  in_progress_block: "Required. Cards in In Progress. Use placeholder text if empty."
+  done_block: "Required. Cards in Done column. Use placeholder text if empty."
+  legend_block: "Required. Category color dots with labels. No hex codes."

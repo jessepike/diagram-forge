@@ -1,0 +1,74 @@
+name: brand_infographic
+display_name: "Brand Infographic (Investor/Marketing Slide)"
+description: "Presentation-ready infographic for investor decks and marketing materials. Designed for warm brand aesthetics: cream/off-white background, organic blob decoration, serif headlines, brand color fills. Use with a brand style reference for consistent output. Not for technical or internal PM diagrams."
+version: "1.0"
+supports:
+  - brand_infographic
+  - investor_slide
+  - marketing
+  - pitch_deck
+  - brand
+
+style_defaults:
+  background: "cream/off-white (#F5F0E8 or similar warm off-white)"
+  font: "serif headline (Playfair Display or similar) + clean sans-serif body"
+  corners: "rounded"
+  borders: "subtle, minimal — let fills carry the visual weight"
+  aspect_ratio: "16:9"
+
+color_system:
+  description: "Brand palette — warm, premium, non-clinical"
+  palette:
+    primary: "teal (#2D7D7B) — primary brand color, main elements"
+    secondary: "sage green (#7A9E7E) — supporting elements, secondary track"
+    accent: "coral/terracotta (#C4694A) — callouts, highlights, data points"
+    neutral: "cream (#F5F0E8) — background, breathing room"
+    dark: "dark teal (#1A3A3A) — headlines, high-contrast text"
+
+prompt_template: |
+  Create a professional brand infographic slide. Warm, premium aesthetic — not clinical or corporate.
+
+  CRITICAL RENDERING INSTRUCTIONS:
+  - Background: cream or off-white (#F5F0E8) — NOT white, NOT gray
+  - Headline font: serif (Playfair Display, Georgia, or similar) — large, bold, impactful
+  - Body font: clean sans-serif (Inter or similar)
+  - Organic blob shapes as subtle decorative background elements — soft, partially off-screen
+  - Flat 2D — NO harsh shadows, but soft depth is acceptable
+  - Colors: warm and purposeful — use brand palette, avoid clinical blues or corporate grays
+  - Icons: simple, line-art style, consistent with brand warmth
+  - {style_defaults_block}
+
+  BRAND COLOR PALETTE:
+  {color_system_block}
+
+  HEADLINE (large serif, dark teal, left-aligned or centered):
+  {headline_block}
+
+  MAIN VISUAL (center or right, takes 50-60% of slide width):
+  {visual_block}
+
+  SUPPORTING CONTENT (left side or below visual):
+  {supporting_block}
+
+  CALLOUT / DATA HIGHLIGHT (optional, coral accent):
+  {callout_block}
+
+  FOOTER / TAGLINE (optional, centered bottom):
+  {footer_block}
+
+  LAYOUT RULES:
+  - Generous whitespace — premium feel requires breathing room
+  - Headline and visual should balance each other (left text / right visual OR centered visual with text above/below)
+  - Organic blob shapes at corners or edges, partially cropped — never centered or symmetrical
+  - All text must be perfectly legible against the cream background
+  - One accent color moment (coral) maximum — don't overuse
+
+  Investor presentation quality. Warm, human, trustworthy.
+  {aspect_ratio} aspect ratio. {resolution} resolution.
+
+variables:
+  headline_block: "Required. Main headline text — large serif, impactful statement."
+  visual_block: "Required. Description of the main visual element (pyramid, diagram, chart, mockup, etc.)."
+  supporting_block: "Optional. Supporting copy, data points, or explanatory text."
+  callout_block: "Optional. Data highlight or key callout in coral accent color."
+  footer_block: "Optional. Tagline or bottom statement."
