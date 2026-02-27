@@ -12,7 +12,7 @@ class TestCostTracker:
     def test_initialize_creates_db(self, tmp_dir):
         """CostTracker should create the database file."""
         db_path = tmp_dir / "test_usage.db"
-        tracker = CostTracker(db_path)
+        CostTracker(db_path)
         assert db_path.exists()
 
     def test_record_and_report(self, tmp_dir):

@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
 from pathlib import Path
+from typing import Any
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -103,7 +104,7 @@ class GenerationResult:
     billing_model: BillingModel = BillingModel.PER_IMAGE
     generation_time_ms: int = 0
     error_message: str | None = None
-    metadata: dict = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -205,7 +206,7 @@ class StyleReference(BaseModel):
     @field_validator("path")
     @classmethod
     def validate_path(cls, v: Path) -> Path:
-        if not v.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp"}:
+        if v.suffix.lower() not in {".png", ".jpg", ".jpeg", ".webp"}:
             raise ValueError(f"Style reference must be an image file, got: {v.suffix}")
         return v
 
@@ -222,7 +223,7 @@ class ProviderConfig(BaseModel):
     model: str
     api_key_env: str
     endpoint: str | None = None
-    extra: dict = Field(default_factory=dict)
+    extra: dict[str, Any] = Field(default_factory=dict)
 
 
 # --- App Config ---
@@ -277,4 +278,4 @@ class UsageReport(BaseModel):
     successful_generations: int = 0
     failed_generations: int = 0
     total_cost_usd: float = 0.0
-    breakdown: list[dict] = Field(default_factory=list)
+    breakdown: list[dict[str, Any]] = Field(default_factory=list)

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import time
+from urllib.parse import urlparse
 
 from diagram_forge.models import (
     BillingModel,
@@ -13,6 +14,9 @@ from diagram_forge.models import (
 )
 from diagram_forge.providers.base import BaseImageProvider
 
+MAX_DOWNLOAD_BYTES = 15 * 1024 * 1024
+ALLOWED_REPLICATE_HOST_SUFFIX = ".replicate.delivery"
+
 
 class ReplicateProvider(BaseImageProvider):
     """Provider for Replicate-hosted image generation models (Flux)."""
@@ -20,7 +24,7 @@ class ReplicateProvider(BaseImageProvider):
     def default_model(self) -> str:
         return "black-forest-labs/flux-schnell"
 
-    def _resolve_dimensions(self, config: GenerationConfig) -> dict:
+    def _resolve_dimensions(self, config: GenerationConfig) -> dict[str, int]:
         """Map resolution + aspect ratio to width/height."""
         base = {"1K": 1024, "2K": 1536, "4K": 2048}.get(config.resolution.value, 1024)
         ar = config.aspect_ratio.value
@@ -32,13 +36,40 @@ class ReplicateProvider(BaseImageProvider):
             return {"width": base, "height": int(base * 3 / 4)}
         return {"width": base, "height": base}
 
+    def _validate_output_url(self, url: str) -> str:
+        parsed = urlparse(url)
+        if parsed.scheme != "https":
+            raise ValueError("Replicate output URL must use https")
+        host = parsed.hostname or ""
+        if not (host == "replicate.delivery" or host.endswith(ALLOWED_REPLICATE_HOST_SUFFIX)):
+            raise ValueError(f"Unexpected Replicate output host: {host}")
+        return url
+
+    async def _download_image_bytes(self, url: str) -> bytes:
+        import httpx
+
+        safe_url = self._validate_output_url(url)
+        timeout = httpx.Timeout(30.0, connect=10.0)
+        async with httpx.AsyncClient(timeout=timeout, follow_redirects=False) as http:
+            resp = await http.get(safe_url)
+            resp.raise_for_status()
+            content_length = int(resp.headers.get("content-length", "0") or "0")
+            if content_length > MAX_DOWNLOAD_BYTES:
+                raise ValueError(
+                    f"Downloaded image exceeds max size ({MAX_DOWNLOAD_BYTES} bytes)"
+                )
+            if len(resp.content) > MAX_DOWNLOAD_BYTES:
+                raise ValueError(
+                    f"Downloaded image exceeds max size ({MAX_DOWNLOAD_BYTES} bytes)"
+                )
+            return resp.content
+
     async def generate(self, config: GenerationConfig) -> GenerationResult:
         start = time.monotonic()
         try:
-            import httpx
             import replicate
 
-            client = replicate.Client(api_token=self.api_key)
+            client = replicate.Client(api_token=self.api_key)  # type: ignore[attr-defined]
             dims = self._resolve_dimensions(config)
 
             output = client.run(
@@ -57,12 +88,7 @@ class ReplicateProvider(BaseImageProvider):
             if output:
                 image_url = output[0] if isinstance(output, list) else output
                 url = str(image_url)
-
-                # Download the image
-                async with httpx.AsyncClient() as http:
-                    resp = await http.get(url)
-                    resp.raise_for_status()
-                    image_data = resp.content
+                image_data = await self._download_image_bytes(url)
 
                 # Estimate cost: ~2s generation at $0.003/s
                 est_seconds = elapsed_ms / 1000
@@ -92,10 +118,9 @@ class ReplicateProvider(BaseImageProvider):
         try:
             import base64
 
-            import httpx
             import replicate
 
-            client = replicate.Client(api_token=self.api_key)
+            client = replicate.Client(api_token=self.api_key)  # type: ignore[attr-defined]
             dims = self._resolve_dimensions(config)
 
             # Encode input image as data URI for Replicate
@@ -118,11 +143,7 @@ class ReplicateProvider(BaseImageProvider):
             if output:
                 image_url = output[0] if isinstance(output, list) else output
                 url = str(image_url)
-
-                async with httpx.AsyncClient() as http:
-                    resp = await http.get(url)
-                    resp.raise_for_status()
-                    image_data = resp.content
+                image_data = await self._download_image_bytes(url)
 
                 est_seconds = elapsed_ms / 1000
                 cost = round(est_seconds * 0.003, 6)
@@ -147,7 +168,7 @@ class ReplicateProvider(BaseImageProvider):
         try:
             import replicate
 
-            client = replicate.Client(api_token=self.api_key)
+            client = replicate.Client(api_token=self.api_key)  # type: ignore[attr-defined]
             _ = client.models.get(self.model)
             elapsed = int((time.monotonic() - start) * 1000)
             return ProviderHealth(

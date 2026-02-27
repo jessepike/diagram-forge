@@ -13,6 +13,7 @@ Generating enterprise-grade architecture diagrams requires a repeatable workflow
 ## Solution
 **diagram-forge**: A standalone MCP server that encapsulates the diagram generation workflow:
 - Template-driven prompt engineering for 7 diagram types
+- Template-driven prompt engineering for 9 diagram types
 - Swappable provider architecture (Gemini, OpenAI, Replicate)
 - Style reference image management
 - SQLite-backed cost tracking and reporting
@@ -37,6 +38,7 @@ Generating enterprise-grade architecture diagrams requires a repeatable workflow
 ## Success Criteria
 - [ ] Generate architecture diagrams via any configured provider
 - [ ] All 7 templates produce well-structured prompts
+- [ ] All 9 templates produce well-structured prompts
 - [ ] Cost tracking records all generations accurately
 - [ ] Works in Claude Code, Claude Desktop, and Codex CLI
 - [ ] Plugin commands provide smooth guided workflow
