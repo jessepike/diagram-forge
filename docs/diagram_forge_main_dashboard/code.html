@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Diagram Forge Main Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b8cee",
+                        "primary-hover": "#1a7bdc",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"],
+                        "sans": ["Inter", "sans-serif"],
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark h-screen overflow-hidden text-slate-900 dark:text-slate-100 flex">
+<!-- Left Panel: Sidebar / Configuration -->
+<aside class="w-[360px] flex flex-col h-full bg-white dark:bg-[#151f28] border-r border-slate-200 dark:border-slate-800 shadow-sm z-10 flex-shrink-0">
+<!-- Header -->
+<div class="h-16 flex items-center justify-between px-5 border-b border-slate-100 dark:border-slate-800/50 flex-shrink-0">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-[20px]">hub</span>
+</div>
+<h1 class="font-bold text-lg text-slate-900 dark:text-white tracking-tight">Diagram Forge</h1>
+</div>
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-800">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+<!-- Scrollable Content Area -->
+<div class="flex-1 overflow-y-auto custom-scrollbar flex flex-col p-5 gap-6">
+<!-- Templates Section -->
+<section class="flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Templates</h2>
+</div>
+<div class="flex flex-col gap-1">
+<!-- Active Item -->
+<button class="group flex items-center justify-between p-3 rounded-lg bg-slate-100 dark:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all text-left">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-700 dark:text-slate-300">schema</span>
+<div>
+<p class="text-sm font-medium text-slate-900 dark:text-white">System Architecture</p>
+<p class="text-xs text-slate-500">Cloud infrastructure map</p>
+</div>
+</div>
+<span class="hidden group-hover:block material-symbols-outlined text-slate-400 text-[18px]">chevron_right</span>
+</button>
+<!-- Inactive Items -->
+<button class="group flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-[#1a2632] border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all text-left">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300">swap_horiz</span>
+<div>
+<p class="text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white">Sequence Diagram</p>
+<p class="text-xs text-slate-400">Process flow interactions</p>
+</div>
+</div>
+</button>
+<button class="group flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-[#1a2632] border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all text-left">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300">dataset</span>
+<div>
+<p class="text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white">ER Diagram</p>
+<p class="text-xs text-slate-400">Database relationships</p>
+</div>
+</div>
+</button>
+<button class="group flex items-center justify-between p-3 rounded-lg hover:bg-slate-50 dark:hover:bg-[#1a2632] border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all text-left">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-300">account_tree</span>
+<div>
+<p class="text-sm font-medium text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white">Flowchart</p>
+<p class="text-xs text-slate-400">Logic &amp; decision trees</p>
+</div>
+</div>
+</button>
+</div>
+</section>
+<hr class="border-slate-100 dark:border-slate-800"/>
+<!-- Content Input Section -->
+<section class="flex flex-col gap-4 flex-1">
+<h2 class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Input</h2>
+<!-- Tabs -->
+<div class="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-lg">
+<button class="flex-1 py-1.5 px-3 rounded-md bg-white dark:bg-[#151f28] shadow-sm text-xs font-semibold text-slate-900 dark:text-white text-center border border-slate-200 dark:border-slate-700">Paste</button>
+<button class="flex-1 py-1.5 px-3 rounded-md text-xs font-medium text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 text-center transition-colors">Upload</button>
+</div>
+<!-- Text Area -->
+<div class="flex flex-col gap-2 flex-1 min-h-[160px]">
+<textarea class="w-full h-full p-3 text-sm text-slate-900 dark:text-slate-100 bg-white dark:bg-[#151f28] border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none placeholder-slate-400" placeholder="Describe your architecture... e.g. 'A user service communicates with an auth service via REST, both use a shared Redis cache and separate PostgreSQL databases.'"></textarea>
+</div>
+<!-- AI Provider Selection -->
+<div class="flex flex-col gap-2">
+<label class="text-xs font-medium text-slate-500">AI Model</label>
+<div class="relative">
+<select class="w-full pl-3 pr-10 py-2.5 bg-white dark:bg-[#151f28] border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/20 focus:border-primary appearance-none cursor-pointer">
+<option>OpenAI GPT-4o</option>
+<option>Anthropic Claude 3.5</option>
+<option>Google Gemini Pro</option>
+</select>
+<div class="absolute inset-y-0 right-0 flex items-center px-3 pointer-events-none text-slate-500">
+<span class="material-symbols-outlined text-[20px]">expand_more</span>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Footer / Action Button -->
+<div class="p-5 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-[#151f28]">
+<button class="w-full py-3 px-4 bg-primary hover:bg-primary-hover text-white font-medium rounded-lg shadow-sm shadow-primary/20 transition-all flex items-center justify-center gap-2 group">
+<span class="material-symbols-outlined text-[20px] group-hover:animate-pulse">auto_awesome</span>
+                Generate Diagram
+            </button>
+<p class="text-center text-[10px] text-slate-400 mt-3">
+                Generates Mermaid.js syntax powered by AI.
+            </p>
+</div>
+</aside>
+<!-- Right Panel: Main Content / Preview -->
+<main class="flex-1 h-full bg-slate-50 dark:bg-[#0b1219] relative flex flex-col items-center justify-center overflow-hidden">
+<!-- Toolbar (Floating) -->
+<div class="absolute top-5 right-5 z-20 flex items-center gap-2">
+<button class="bg-white dark:bg-[#151f28] border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-primary hover:border-primary/30 p-2 rounded-lg shadow-sm transition-all" title="Download">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+<button class="bg-white dark:bg-[#151f28] border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-primary hover:border-primary/30 p-2 rounded-lg shadow-sm transition-all" title="Share">
+<span class="material-symbols-outlined text-[20px]">share</span>
+</button>
+<button class="bg-white dark:bg-[#151f28] border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-primary hover:border-primary/30 p-2 rounded-lg shadow-sm transition-all" title="Fullscreen">
+<span class="material-symbols-outlined text-[20px]">fullscreen</span>
+</button>
+</div>
+<!-- Empty State Container -->
+<div class="flex flex-col items-center justify-center max-w-md text-center p-8 animate-in fade-in zoom-in duration-500">
+<!-- Icon Circle -->
+<div class="w-24 h-24 bg-white dark:bg-[#151f28] rounded-full shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-center mb-6 relative">
+<div class="absolute inset-0 rounded-full border border-dashed border-slate-200 dark:border-slate-700 animate-[spin_10s_linear_infinite]"></div>
+<span class="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-600">draw</span>
+</div>
+<h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-2">Ready to Forge</h3>
+<p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-8">
+                Select a template from the left panel and describe your system. Your generated diagram will appear here instantly.
+            </p>
+<!-- Example Chips -->
+<div class="flex flex-wrap justify-center gap-2">
+<button class="px-3 py-1.5 bg-white dark:bg-[#151f28] border border-slate-200 dark:border-slate-700 rounded-full text-xs text-slate-500 hover:text-primary hover:border-primary/30 transition-colors cursor-pointer">
+                    Microservices Architecture
+                </button>
+<button class="px-3 py-1.5 bg-white dark:bg-[#151f28] border border-slate-200 dark:border-slate-700 rounded-full text-xs text-slate-500 hover:text-primary hover:border-primary/30 transition-colors cursor-pointer">
+                    User Login Flow
+                </button>
+<button class="px-3 py-1.5 bg-white dark:bg-[#151f28] border border-slate-200 dark:border-slate-700 rounded-full text-xs text-slate-500 hover:text-primary hover:border-primary/30 transition-colors cursor-pointer">
+                    E-commerce DB Schema
+                </button>
+</div>
+</div>
+<!-- Dot Pattern Background -->
+<div class="absolute inset-0 pointer-events-none opacity-[0.4]" style="background-image: radial-gradient(#cbd5e1 1px, transparent 1px); background-size: 24px 24px;">
+</div>
+</main>
+</body></html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Diagram Forge Settings Panel</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#2b8cee",
+                        "background-light": "#f6f7f8",
+                        "background-dark": "#101922",
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display antialiased text-slate-900 dark:text-slate-100 h-screen w-full overflow-hidden flex items-center justify-center">
+<!-- Modal Overlay Backdrop -->
+<div aria-hidden="true" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 transition-opacity"></div>
+<!-- Modal Container -->
+<div class="relative z-50 w-full max-w-lg mx-4 transform transition-all">
+<div class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden flex flex-col max-h-[90vh]">
+<!-- Header -->
+<div class="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-slate-800">
+<h2 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Settings</h2>
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+<span class="material-symbols-outlined text-2xl">close</span>
+</button>
+</div>
+<!-- Content Scroll Area -->
+<div class="flex-1 overflow-y-auto px-6 py-6">
+<!-- Introduction Text -->
+<div class="mb-6">
+<p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">
+                        Configure your AI provider to generate architecture diagrams. Your API keys are stored locally for this session.
+                    </p>
+</div>
+<!-- Provider Selection -->
+<div class="mb-5 space-y-2">
+<label class="block text-sm font-medium text-slate-900 dark:text-white">AI Provider</label>
+<div class="relative">
+<select class="form-select block w-full rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:border-primary focus:ring-primary sm:text-sm h-12 pl-4 pr-10 appearance-none cursor-pointer">
+<option value="auto">Auto (Recommended)</option>
+<option value="gemini">Google Gemini</option>
+<option value="openai">OpenAI GPT-4</option>
+</select>
+<div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+<span class="material-symbols-outlined text-xl">expand_more</span>
+</div>
+</div>
+</div>
+<!-- API Key Input -->
+<div class="mb-2 space-y-2">
+<label class="block text-sm font-medium text-slate-900 dark:text-white">API Key</label>
+<div class="relative flex items-center">
+<input class="form-input block w-full rounded-lg border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary focus:ring-primary sm:text-sm h-12 pl-4 pr-12" placeholder="sk-..." type="password" value="sk-proj-1234567890abcdef1234567890"/>
+<button class="absolute right-0 top-0 bottom-0 px-3 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+<span class="material-symbols-outlined text-xl">visibility_off</span>
+</button>
+</div>
+</div>
+<!-- Helper Links -->
+<div class="flex flex-col gap-2 mb-6">
+<a class="inline-flex items-center text-xs text-primary hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium" href="#">
+                        Where do I get a Gemini key?
+                        <span class="material-symbols-outlined text-sm ml-1">open_in_new</span>
+</a>
+<a class="inline-flex items-center text-xs text-primary hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium" href="#">
+                        Where do I get an OpenAI key?
+                        <span class="material-symbols-outlined text-sm ml-1">open_in_new</span>
+</a>
+</div>
+<!-- Security Note -->
+<div class="flex gap-3 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-900/30">
+<span class="material-symbols-outlined text-primary shrink-0">shield_lock</span>
+<p class="text-xs text-slate-600 dark:text-slate-300 leading-normal">
+                        Your API key is stored locally in your browser and is never sent to our servers except to process your direct request to the provider.
+                    </p>
+</div>
+</div>
+<!-- Footer Actions -->
+<div class="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3">
+<button class="px-4 py-2.5 rounded-lg text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white transition-colors">
+                    Cancel
+                </button>
+<button class="px-5 py-2.5 rounded-lg text-sm font-bold text-white bg-primary hover:bg-blue-600 transition-all shadow-sm shadow-blue-500/20 active:scale-95">
+                    Save for this session
+                </button>
+</div>
+</div>
+</div>
+</body></html>
