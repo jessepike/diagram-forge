@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useRef } from "react";
 import type { Template, UIState, InputTab } from "@/app/page";
 import TemplateCard from "./TemplateCard";
 
@@ -30,6 +33,49 @@ export default function LeftPanel({
   onOpenSettings,
   uiState,
 }: LeftPanelProps) {
+  const [uploadStatus, setUploadStatus] = useState<
+    "idle" | "uploading" | "done" | "error"
+  >("idle");
+  const [uploadFilename, setUploadFilename] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleFileUpload(file: File) {
+    const formData = new FormData();
+    formData.append("file", file);
+    setUploadStatus("uploading");
+    setUploadFilename(file.name);
+    setUploadError(null);
+
+    try {
+      const res = await fetch("/api/extract", {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(body?.detail ?? `Upload failed (${res.status})`);
+      }
+      const data = await res.json();
+      onContentChange(data.text);
+      setUploadStatus("done");
+      onTabChange("paste");
+    } catch (err: unknown) {
+      setUploadStatus("error");
+      setUploadError(
+        err instanceof Error ? err.message : "Upload failed"
+      );
+    }
+  }
+
+  function clearUpload() {
+    setUploadStatus("idle");
+    setUploadFilename(null);
+    setUploadError(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
   return (
     <div className="w-[400px] min-w-[400px] bg-white border-r border-slate-200 flex flex-col h-full">
       {/* Header */}
@@ -111,12 +157,90 @@ export default function LeftPanel({
               className="w-full h-32 p-3 text-sm border border-slate-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary placeholder:text-slate-400"
             />
           ) : (
-            <div className="w-full h-32 border-2 border-dashed border-slate-300 rounded-lg flex flex-col items-center justify-center text-slate-400 text-sm">
-              <span className="material-symbols-outlined text-2xl mb-1">
-                upload_file
-              </span>
-              <span>Upload coming in WUI-04</span>
-            </div>
+            <>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.docx,.md"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleFileUpload(file);
+                }}
+              />
+
+              {uploadStatus === "idle" && (
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setIsDragOver(true);
+                  }}
+                  onDragLeave={() => setIsDragOver(false)}
+                  onDrop={(e) => {
+                    e.preventDefault();
+                    setIsDragOver(false);
+                    const file = e.dataTransfer.files[0];
+                    if (file) handleFileUpload(file);
+                  }}
+                  className={`w-full h-32 border-2 border-dashed rounded-lg flex flex-col items-center justify-center text-sm cursor-pointer transition-colors ${
+                    isDragOver
+                      ? "border-primary bg-primary/5 text-primary"
+                      : "border-slate-300 text-slate-400 hover:border-slate-400 hover:text-slate-500"
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-2xl mb-1">
+                    upload_file
+                  </span>
+                  <span>Browse or drag a file here</span>
+                  <span className="text-xs mt-1">.pdf, .docx, .md</span>
+                </div>
+              )}
+
+              {uploadStatus === "uploading" && (
+                <div className="w-full h-32 border-2 border-dashed border-primary/40 rounded-lg flex flex-col items-center justify-center text-sm text-primary">
+                  <span className="material-symbols-outlined text-2xl mb-1 animate-spin">
+                    progress_activity
+                  </span>
+                  <span>Extracting {uploadFilename}...</span>
+                </div>
+              )}
+
+              {uploadStatus === "done" && (
+                <div className="w-full h-32 border-2 border-dashed border-green-300 bg-green-50 rounded-lg flex flex-col items-center justify-center text-sm text-green-700 gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-lg">
+                      check_circle
+                    </span>
+                    <span className="font-medium">{uploadFilename}</span>
+                  </div>
+                  <span className="text-xs text-green-600">
+                    {contentInput.length.toLocaleString()} chars extracted
+                  </span>
+                  <button
+                    onClick={clearUpload}
+                    className="text-xs text-green-600 underline hover:text-green-800"
+                  >
+                    Clear
+                  </button>
+                </div>
+              )}
+
+              {uploadStatus === "error" && (
+                <div className="w-full h-32 border-2 border-dashed border-red-300 bg-red-50 rounded-lg flex flex-col items-center justify-center text-sm text-red-600 gap-2">
+                  <span className="material-symbols-outlined text-2xl">
+                    error
+                  </span>
+                  <span>{uploadError}</span>
+                  <button
+                    onClick={clearUpload}
+                    className="text-xs text-red-500 underline hover:text-red-700"
+                  >
+                    Try again
+                  </button>
+                </div>
+              )}
+            </>
           )}
 
           {/* Provider select */}
