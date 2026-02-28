@@ -6,18 +6,30 @@ export async function POST(request: NextRequest) {
 
   const formData = await request.formData();
 
-  const res = await fetch(`${apiUrl}/extract`, {
-    method: "POST",
-    headers: { "X-API-Secret": apiSecret },
-    body: formData,
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${apiUrl}/extract`, {
+      method: "POST",
+      headers: { "X-API-Secret": apiSecret },
+      body: formData,
+    });
+  } catch {
+    return NextResponse.json(
+      { error: "Backend unavailable" },
+      { status: 502 },
+    );
+  }
 
   if (!res.ok) {
-    const error = await res.text();
-    return NextResponse.json(
-      { error: error || "Extraction failed" },
-      { status: res.status },
-    );
+    let errorMsg = "Extraction failed";
+    try {
+      const json = await res.json();
+      errorMsg = json.detail ?? errorMsg;
+    } catch {
+      const text = await res.text();
+      if (text) errorMsg = text;
+    }
+    return NextResponse.json({ error: errorMsg }, { status: res.status });
   }
 
   const data = await res.json();

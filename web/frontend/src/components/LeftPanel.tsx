@@ -17,6 +17,7 @@ interface LeftPanelProps {
   onGenerate: () => void;
   onOpenSettings: () => void;
   uiState: UIState;
+  templatesLoading?: boolean;
 }
 
 export default function LeftPanel({
@@ -32,6 +33,7 @@ export default function LeftPanel({
   onGenerate,
   onOpenSettings,
   uiState,
+  templatesLoading,
 }: LeftPanelProps) {
   const [uploadStatus, setUploadStatus] = useState<
     "idle" | "uploading" | "done" | "error"
@@ -40,6 +42,11 @@ export default function LeftPanel({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const generateDisabled =
+    uiState === "generating" ||
+    !selectedTemplate ||
+    !contentInput.trim();
 
   async function handleFileUpload(file: File) {
     const formData = new FormData();
@@ -104,16 +111,40 @@ export default function LeftPanel({
             Templates
           </h3>
           <div className="space-y-1">
-            {templates.map((t) => (
-              <TemplateCard
-                key={t.id}
-                id={t.id}
-                name={t.name}
-                description={t.description}
-                isActive={selectedTemplate === t.id}
-                onClick={() => onSelectTemplate(t.id)}
-              />
-            ))}
+            {templatesLoading ? (
+              /* Loading skeleton */
+              <>
+                {[1, 2, 3].map((i) => (
+                  <div
+                    key={i}
+                    className="p-3 rounded-lg border border-slate-100 animate-pulse"
+                  >
+                    <div className="h-4 w-32 bg-slate-200 rounded mb-2" />
+                    <div className="h-3 w-full bg-slate-100 rounded" />
+                  </div>
+                ))}
+              </>
+            ) : templates.length === 0 ? (
+              <div className="p-4 text-center text-sm text-slate-400 bg-slate-50 rounded-lg border border-dashed border-slate-200">
+                <span className="material-symbols-outlined text-lg block mb-1">
+                  warning
+                </span>
+                Could not load templates.
+                <br />
+                Check that the backend is running.
+              </div>
+            ) : (
+              templates.map((t) => (
+                <TemplateCard
+                  key={t.id}
+                  id={t.id}
+                  name={t.name}
+                  description={t.description}
+                  isActive={selectedTemplate === t.id}
+                  onClick={() => onSelectTemplate(t.id)}
+                />
+              ))
+            )}
           </div>
         </div>
 
@@ -265,14 +296,21 @@ export default function LeftPanel({
       <div className="p-5 border-t border-slate-200">
         <button
           onClick={onGenerate}
-          disabled={uiState === "generating"}
-          className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover disabled:opacity-60 text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
+          disabled={generateDisabled}
+          className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium py-2.5 px-4 rounded-lg transition-colors"
         >
           <span className="material-symbols-outlined text-lg">
             auto_awesome
           </span>
           {uiState === "generating" ? "Generating..." : "Generate Diagram"}
         </button>
+        {generateDisabled && uiState !== "generating" && (
+          <p className="text-xs text-slate-400 text-center mt-2">
+            {!selectedTemplate
+              ? "Select a template above"
+              : "Enter content to generate a diagram"}
+          </p>
+        )}
       </div>
     </div>
   );

@@ -6,21 +6,33 @@ export async function POST(request: NextRequest) {
 
   const body = await request.json();
 
-  const res = await fetch(`${apiUrl}/generate`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-API-Secret": apiSecret,
-    },
-    body: JSON.stringify(body),
-  });
+  let res: Response;
+  try {
+    res = await fetch(`${apiUrl}/generate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-API-Secret": apiSecret,
+      },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    return NextResponse.json(
+      { error: "Backend unavailable" },
+      { status: 502 },
+    );
+  }
 
   if (!res.ok) {
-    const error = await res.text();
-    return NextResponse.json(
-      { error: error || "Generation failed" },
-      { status: res.status },
-    );
+    let errorMsg = "Generation failed";
+    try {
+      const json = await res.json();
+      errorMsg = json.detail ?? errorMsg;
+    } catch {
+      const text = await res.text();
+      if (text) errorMsg = text;
+    }
+    return NextResponse.json({ error: errorMsg }, { status: res.status });
   }
 
   const data = await res.json();

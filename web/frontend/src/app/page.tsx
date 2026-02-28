@@ -28,6 +28,8 @@ export default function Home() {
     cost_usd: number;
   } | null>(null);
   const [uiState, setUiState] = useState<UIState>("initial");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [templatesLoading, setTemplatesLoading] = useState(true);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsProvider, setSettingsProvider] = useState("auto");
   const [apiKey, setApiKey] = useState("");
@@ -45,23 +47,41 @@ export default function Home() {
 
   // Fetch templates on mount
   useEffect(() => {
+    setTemplatesLoading(true);
     fetch("/api/templates")
       .then((res) => res.json())
-      .then((data: Template[]) => {
-        setTemplates(data);
-        if (data.length > 0) setSelectedTemplate(data[0].id);
+      .then((data) => {
+        if (data.error) {
+          console.error("Template fetch error:", data.error);
+          setTemplates([]);
+        } else {
+          const list = data as Template[];
+          setTemplates(list);
+          if (list.length > 0) setSelectedTemplate(list[0].id);
+        }
       })
-      .catch((err) => console.error("Failed to load templates:", err));
+      .catch((err) => console.error("Failed to load templates:", err))
+      .finally(() => setTemplatesLoading(false));
   }, []);
 
   const handleGenerate = async () => {
-    if (!selectedTemplate || !contentInput.trim()) return;
+    if (!selectedTemplate) {
+      setErrorMessage("Please select a template first.");
+      setUiState("error");
+      return;
+    }
+    if (!contentInput.trim()) {
+      setErrorMessage("Please enter some content to generate a diagram from.");
+      setUiState("error");
+      return;
+    }
 
     const resolvedProvider =
       provider === "auto"
         ? (templates.find((t) => t.id === selectedTemplate)?.recommended_provider || "gemini")
         : provider;
 
+    setErrorMessage(null);
     setUiState("generating");
     try {
       const res = await fetch("/api/generate", {
@@ -75,9 +95,14 @@ export default function Home() {
         }),
       });
 
-      if (!res.ok) throw new Error(`Generation failed: ${res.status}`);
-
       const data = await res.json();
+
+      if (!res.ok) {
+        setErrorMessage(data.error || `Generation failed (${res.status})`);
+        setUiState("error");
+        return;
+      }
+
       setGeneratedImage(data.image_base64);
       setGeneratedMeta({
         provider: data.provider,
@@ -85,8 +110,8 @@ export default function Home() {
         cost_usd: data.cost_usd,
       });
       setUiState("success");
-    } catch (err) {
-      console.error("Generation error:", err);
+    } catch {
+      setErrorMessage("Network error — could not reach the server.");
       setUiState("error");
     }
   };
@@ -115,12 +140,14 @@ export default function Home() {
         onGenerate={handleGenerate}
         onOpenSettings={() => setSettingsOpen(true)}
         uiState={uiState}
+        templatesLoading={templatesLoading}
       />
       <RightPanel
         uiState={uiState}
         generatedImage={generatedImage}
         generatedMeta={generatedMeta}
         onRegenerate={handleGenerate}
+        errorMessage={errorMessage}
       />
       {settingsOpen && (
         <SettingsModal

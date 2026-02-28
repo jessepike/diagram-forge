@@ -9,6 +9,7 @@ interface RightPanelProps {
     cost_usd: number;
   } | null;
   onRegenerate: () => void;
+  errorMessage?: string | null;
 }
 
 const EXAMPLE_PROMPTS = [
@@ -22,6 +23,7 @@ export default function RightPanel({
   generatedImage,
   generatedMeta,
   onRegenerate,
+  errorMessage,
 }: RightPanelProps) {
   const handleDownload = () => {
     if (!generatedImage) return;
@@ -35,7 +37,11 @@ export default function RightPanel({
     <div className="flex-1 relative dot-grid overflow-hidden">
       {/* Floating toolbar */}
       <div className="absolute top-4 right-4 flex items-center gap-1 z-10">
-        <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-white/80 rounded-lg transition-colors">
+        <button
+          onClick={handleDownload}
+          disabled={!generatedImage}
+          className="p-2 text-slate-400 hover:text-slate-600 hover:bg-white/80 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        >
           <span className="material-symbols-outlined text-xl">download</span>
         </button>
         <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-white/80 rounded-lg transition-colors">
@@ -63,9 +69,18 @@ export default function RightPanel({
             a professional architecture diagram.
           </p>
           {uiState === "error" && (
-            <p className="text-sm text-red-500 mb-4">
-              Generation failed. Please check your API key and try again.
-            </p>
+            <div className="mb-4 flex flex-col items-center gap-2">
+              <p className="text-sm text-red-500">
+                {errorMessage ?? "Generation failed. Please check your API key and try again."}
+              </p>
+              <button
+                onClick={onRegenerate}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors"
+              >
+                <span className="material-symbols-outlined text-base">refresh</span>
+                Try again
+              </button>
+            </div>
           )}
           <div className="flex flex-wrap gap-2 justify-center">
             {EXAMPLE_PROMPTS.map((prompt) => (
