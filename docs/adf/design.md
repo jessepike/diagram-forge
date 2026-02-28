@@ -303,9 +303,9 @@ No database. All state is ephemeral:
 
 | Question | Deferred To | Notes |
 |---|---|---|
-| Dockerfile vs nixpacks for Railway deploy | Develop | Both viable; nixpacks is zero-config for Python |
+| Railway deploy method | Develop | Dockerfile — nixpacks not used |
 | sessionStorage vs in-memory only for API key | Develop | sessionStorage survives refresh; decide based on UX testing |
-| Tailwind dark theme: which specific color palette | Develop | Linear/Zed-inspired dark — implementer picks exact hex values |
+| Theme | Develop | Light theme — palette TBD from design prototype |
 
 ---
 
@@ -348,9 +348,9 @@ Single-page web app in `web/` monorepo subdir. Next.js (Vercel) proxies to FastA
 - Env vars: `RAILWAY_API_SECRET` (both), `RAILWAY_API_URL` (Vercel)
 
 ### Open Questions for Develop
-1. Dockerfile vs nixpacks on Railway — try nixpacks first, fall back to Dockerfile
+1. Railway deploy: Dockerfile
 2. sessionStorage vs in-memory — default to sessionStorage, revisit if security concern
-3. Dark theme palette — implement Linear-inspired: bg `#0f0f0f`, surface `#1a1a1a`, border `#2a2a2a`, text `#e5e5e5`, accent `#5b5fc7`
+3. Light theme — palette and visual direction from design prototype (Google Stitch)
 
 ### Success Criteria (Verify During Implementation)
 - [ ] A colleague (provided an API key) produces a usable diagram without instructions
