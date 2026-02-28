@@ -44,8 +44,11 @@
 - 2026-02-27: Committed 4 new templates (B17, B18), updated README to 13 templates, started Web UI Discover planning
 - 2026-02-27: Completed Web UI Discover exploration + internal review (2 cycles, 0 open Critical/High issues)
 - 2026-02-27: Design review complete — internal (2 cycles) + external (GPT); design.md v0.3, 0 open Critical/High
+- 2026-02-28: Recovered from crash; ran design review; fixed Dockerfile/light theme; Vercel plugin installed; Stitch prototypes reviewed
 
 ## Next Steps
+- [ ] Incorporate Stitch visual direction into design.md (palette, component patterns from main dashboard + settings)
+- [ ] Correct generated-result screen (no sidebar nav, no projects/history/PRO — just diagram + Regenerate + Download)
 - [ ] Web UI — Develop stage: build web/ monorepo (FastAPI skeleton → Next.js scaffold → wire → deploy)
 - [ ] B1: Restore recommended_provider/model fields to new templates
 - [ ] B2: Test remaining templates (architecture, component, sequence, integration, infographic)
