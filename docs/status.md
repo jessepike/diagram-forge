@@ -43,9 +43,10 @@
 ## Session Log
 - 2026-02-27: Committed 4 new templates (B17, B18), updated README to 13 templates, started Web UI Discover planning
 - 2026-02-27: Completed Web UI Discover exploration + internal review (2 cycles, 0 open Critical/High issues)
+- 2026-02-27: Design review complete — internal (2 cycles) + external (GPT); design.md v0.3, 0 open Critical/High
 
 ## Next Steps
-- [ ] Web UI — Design stage: Intake & Clarification → design.md → review
+- [ ] Web UI — Develop stage: build web/ monorepo (FastAPI skeleton → Next.js scaffold → wire → deploy)
 - [ ] B1: Restore recommended_provider/model fields to new templates
 - [ ] B2: Test remaining templates (architecture, component, sequence, integration, infographic)
 - [ ] B13: Publish to PyPI (`pip install diagram-forge`)
