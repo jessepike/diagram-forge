@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #2b8cee;
+  --color-primary-hover: #1a7bdc;
+  --color-background-light: #f6f7f8;
+  --color-background-dark: #101922;
+  --font-display: "Inter", sans-serif;
+  --font-sans: "Inter", sans-serif;
+}
+
+.dot-grid {
+  background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+  background-size: 24px 24px;
+}
