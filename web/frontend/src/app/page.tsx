@@ -58,7 +58,9 @@ export default function Home() {
     if (!selectedTemplate || !contentInput.trim()) return;
 
     const resolvedProvider =
-      provider === "auto" ? "gemini" : provider;
+      provider === "auto"
+        ? (templates.find((t) => t.id === selectedTemplate)?.recommended_provider || "gemini")
+        : provider;
 
     setUiState("generating");
     try {
