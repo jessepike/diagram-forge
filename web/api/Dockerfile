@@ -3,4 +3,6 @@ WORKDIR /app
 COPY . /app/repo
 WORKDIR /app/repo
 RUN pip install --no-cache-dir -r web/api/requirements.txt
-CMD ["uvicorn", "web.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+ENV PORT=8000
+EXPOSE 8000
+CMD uvicorn web.api.main:app --host 0.0.0.0 --port $PORT

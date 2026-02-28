@@ -1,0 +1,13 @@
+.git/
+web/frontend/node_modules/
+web/frontend/.next/
+__pycache__/
+*.pyc
+tests/
+docs/
+.claude/
+*.md
+.env*
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/

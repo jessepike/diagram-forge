@@ -16,7 +16,7 @@ app = FastAPI(title="Diagram Forge API", version="0.1.0")
 
 # --- CORS ---
 
-_allowed_origins = os.environ.get("ALLOWED_ORIGINS", "*")
+_allowed_origins = os.environ.get("ALLOWED_ORIGINS", "")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in _allowed_origins.split(",")],
