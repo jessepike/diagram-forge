@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -21,16 +22,18 @@ def load_config(config_path: str | Path | None = None) -> AppConfig:
         config_path = os.environ.get("DIAGRAM_FORGE_CONFIG", str(DEFAULT_CONFIG_PATH))
 
     path = Path(config_path).expanduser()
+    raw: dict[str, Any]
 
     if path.exists():
         with open(path) as f:
-            raw = yaml.safe_load(f) or {}
+            loaded = yaml.safe_load(f) or {}
+            raw = loaded if isinstance(loaded, dict) else {}
     else:
         raw = {}
 
     # Parse providers section into ProviderConfig objects
     providers_raw = raw.pop("providers", {})
-    providers = {}
+    providers: dict[str, ProviderConfig] = {}
     for name, cfg in providers_raw.items():
         if isinstance(cfg, dict):
             providers[name] = ProviderConfig(**cfg)
