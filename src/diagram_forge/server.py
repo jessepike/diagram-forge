@@ -17,6 +17,7 @@ from diagram_forge.models import (
     DiagramType,
     GenerationConfig,
     GenerationRecord,
+    Quality,
     Resolution,
 )
 from diagram_forge.providers import PROVIDER_MAP, get_provider
@@ -109,71 +110,126 @@ def create_server(config_path: str | None = None) -> Any:
         style_reference: str | None = None,
         output_path: str | None = None,
         temperature: float = 1.0,
+        quality: str = "auto",
     ) -> dict:
         """Generate an architecture diagram from a text prompt.
 
         Args:
             prompt: Description of what to generate
             diagram_type: Type of diagram (architecture|data_flow|component|sequence|integration|infographic|c4_container|exec_infographic|generic)
-            provider: Image generation provider (auto|gemini|openai|replicate). "auto" picks the best provider for the diagram type.
-            model: Override the default model for this provider (e.g. gpt-image-1.5, gemini-3-pro-image-preview)
+            provider: Image generation provider (auto|gemini|openai). "auto" picks the best provider for the diagram type.
+            model: Override the default model for this provider (e.g. gpt-image-2-2026-04-21, gpt-image-1-mini, gemini-3-pro-image-preview)
             resolution: Output resolution (1K|2K|4K)
             aspect_ratio: Output aspect ratio (16:9|1:1|9:16|4:3)
             style_reference: Style name or path to reference image
             output_path: Where to save the image (auto-generated if not provided)
             temperature: Generation creativity (0.0 to 2.0)
+            quality: Output quality tier for OpenAI gpt-image-2 / gpt-image-1-mini (low|medium|high|auto).
+                Cost scales dramatically: at 1536x1024 on gpt-image-2, low=$0.005, medium=$0.041, high=$0.165.
+                Ignored by Gemini and legacy gpt-image-1.5. Default: auto.
         """
         start = time.monotonic()
 
-        # Auto-select provider from template recommendation
-        if provider == "auto":
+        # Auto-select provider / model / quality from template recommendation.
+        # `quality="auto"` means "no caller override" — let the template decide.
+        if provider == "auto" or quality == "auto":
             try:
                 tmpl = load_template(diagram_type)
-                provider = tmpl.recommended_provider or config.default_provider.value
-                if not model and tmpl.recommended_model:
-                    model = tmpl.recommended_model
+                if provider == "auto":
+                    provider = tmpl.recommended_provider or config.default_provider.value
+                    if not model and tmpl.recommended_model:
+                        model = tmpl.recommended_model
+                if quality == "auto" and tmpl.recommended_quality:
+                    quality = tmpl.recommended_quality
             except FileNotFoundError:
-                provider = config.default_provider.value
+                if provider == "auto":
+                    provider = config.default_provider.value
 
-        # Resolve provider
-        provider_config = config.providers.get(provider)
-        if not provider_config:
-            return {"status": "error", "error": f"Provider '{provider}' not configured"}
+        # Build fallback chain: explicit provider first, then config chain, skip dupes
+        if provider == "auto" or provider == config.default_provider.value:
+            candidates = list(config.provider_fallback_chain) or [provider]
+        else:
+            # Explicit provider requested — try it first, then append remainder of chain
+            chain = config.provider_fallback_chain or []
+            candidates = [provider] + [p for p in chain if p != provider]
 
-        api_key = resolve_api_key(provider_config)
-        if not api_key:
-            return {
-                "status": "error",
-                "error": f"No API key for provider '{provider}'. "
-                f"Set {provider_config.api_key_env} environment variable.",
-            }
-
-        # Build the full prompt from template + user prompt
+        # Build the full prompt from template + user prompt (global tokens injected automatically)
         full_prompt = build_prompt(
             diagram_type=diagram_type,
             user_prompt=prompt,
             resolution=resolution,
             aspect_ratio=aspect_ratio,
+            design_tokens=config.design_tokens,
         )
 
-        # Resolve style reference
+        # Resolve style reference — inject description into prompt for text-only providers.
+        # When a file path is given, the path is passed directly; the edit API uses it visually.
         style_path = None
         if style_reference:
             style_path = style_manager.get_style_path(style_reference)
+            style_obj = style_manager.get_style(style_reference)
+            if style_obj and style_obj.description:
+                full_prompt = (
+                    f"STYLE REFERENCE — match this style exactly:\n{style_obj.description}\n\n"
+                    f"{full_prompt}"
+                )
+            elif style_path and not style_obj:
+                # Direct file path provided — no text description available,
+                # but prompt GPT to treat the input image as a visual style guide.
+                full_prompt = (
+                    f"STYLE REFERENCE — the input image shows the exact visual style to match. "
+                    f"Generate new content with the same layout, typography, colors, and design "
+                    f"language, but replace all content with the following:\n\n{full_prompt}"
+                )
 
-        # Build generation config
         gen_config = GenerationConfig(
             prompt=full_prompt,
             resolution=Resolution(resolution),
             aspect_ratio=AspectRatio(aspect_ratio),
             temperature=temperature,
+            quality=Quality(quality),
             style_reference_path=style_path,
         )
 
-        # Generate
-        effective_model = model or provider_config.model
-        img_provider = get_provider(provider, api_key, model=effective_model)
-        result = await img_provider.generate(gen_config)
+        # Try each provider in the fallback chain
+        result = None
+        effective_provider = None
+        effective_model = None
+        for candidate in candidates:
+            provider_config = config.providers.get(candidate)
+            if not provider_config or not provider_config.enabled:
+                continue
+            api_key = resolve_api_key(provider_config)
+            if not api_key:
+                continue
+            candidate_model = model if (candidate == candidates[0] and model) else provider_config.model
+            img_provider = get_provider(candidate, api_key, model=candidate_model)
+            result = await img_provider.generate(gen_config)
+            effective_provider = candidate
+            effective_model = candidate_model
+            cost_tracker.record(
+                GenerationRecord(
+                    provider=candidate,
+                    model=candidate_model,
+                    diagram_type=diagram_type,
+                    resolution=resolution,
+                    aspect_ratio=aspect_ratio,
+                    tokens_used=result.tokens_used,
+                    cost_usd=result.cost_usd,
+                    billing_model=result.billing_model.value,
+                    generation_time_ms=int((time.monotonic() - start) * 1000),
+                    success=result.success,
+                    output_path=None,
+                    template_used=diagram_type,
+                    style_used=style_reference,
+                    error_message=result.error_message,
+                )
+            )
+            if result.success:
+                break
+
+        if result is None:
+            return {"status": "error", "error": "No providers configured or API keys missing"}
 
         elapsed_ms = int((time.monotonic() - start) * 1000)
 
@@ -193,28 +249,9 @@ def create_server(config_path: str | None = None) -> Any:
             saved_path = str(save_to)
             result.output_path = saved_path
 
-        # Track cost
-        cost_tracker.record(
-            GenerationRecord(
-                provider=provider,
-                model=effective_model,
-                diagram_type=diagram_type,
-                resolution=resolution,
-                aspect_ratio=aspect_ratio,
-                tokens_used=result.tokens_used,
-                cost_usd=result.cost_usd,
-                billing_model=result.billing_model.value,
-                generation_time_ms=elapsed_ms,
-                success=result.success,
-                output_path=saved_path,
-                template_used=diagram_type,
-                style_used=style_reference,
-                error_message=result.error_message,
-            )
-        )
-
         response = _serialize(result)
         response["status"] = "success" if result.success else "error"
+        response["provider_used"] = effective_provider
         if saved_path:
             response["output_path"] = saved_path
         return response
@@ -235,7 +272,7 @@ def create_server(config_path: str | None = None) -> Any:
         Args:
             image_path: Path to the existing diagram image
             prompt: Edit instructions
-            provider: Image generation provider (gemini|openai|replicate)
+            provider: Image generation provider (gemini|openai)
             resolution: Output resolution (auto-detect if not specified)
             reference_images: Additional reference image paths
             output_path: Where to save the result
@@ -426,7 +463,7 @@ def create_server(config_path: str | None = None) -> Any:
         """Configure an API key for a provider (sets environment variable for current session).
 
         Args:
-            provider: Provider name (gemini|openai|replicate)
+            provider: Provider name (gemini|openai)
             api_key: The API key to set
         """
         import os

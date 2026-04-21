@@ -98,6 +98,15 @@
 - **Template file:** `src/diagram_forge/templates/brand_infographic.yaml`
 - **Acceptance:** Generates investor-quality slides that match a provided brand style reference
 
+### B19: "Technical Brief" template (feature_brief)
+- **Priority:** P2
+- **Status:** Pending — pattern validated in EvenGround session (2026-03-01)
+- **Details:** A portrait-format (9:16) 1-page technical brief template for summarizing what was built in a feature area. Pattern: title bar → foundation/context strip → gap/change cards (2-col grid with colored left borders) → flow diagram → coverage footer. Proven useful for async team oversight at speed — lets a founder/PM quickly understand architectural decisions without reading code diffs.
+- **Reference diagram:** `/Users/jessepike/code/clients/even-ground/docs/diagrams/crisis-detection-brief.png`
+- **Key design elements:** colored left-border cards (red/amber/orange by severity), horizontal flow diagram with color-coded steps, dark navy header + footer, dense but readable, monospace for file/code refs
+- **Template file:** `src/diagram_forge/templates/feature_brief.yaml` (to create)
+- **Acceptance:** Generates a readable 1-page technical brief from structured prompt input. Works well at 9:16 aspect ratio in 2K resolution.
+
 ### B18: PM diagram templates (product_roadmap, workstreams, kanban)
 - **Priority:** P2
 - **Status:** Templates written and live (2026-02-27) — validated with EvenGround project
@@ -107,6 +116,12 @@
   - `kanban` — three-column board with category color bars, no-duplicate guard
 - **Style references:** `minimal-app-ui`, `minimal-kanban`, `product-roadmap-status` saved as baselines
 - **Acceptance:** Already complete — add to README, update template count
+
+### B20: Move API keys out of plaintext ~/.zshrc
+- **Priority:** P0
+- **Status:** Pending
+- **Details:** GEMINI_API_KEY and OPENAI_API_KEY are exported as plaintext in `~/.zshrc` (lines 57-58). This was set up for diagram-forge's MCP config which reads `${GEMINI_API_KEY}` / `${OPENAI_API_KEY}` env vars. The MCP `.mcp.json` pattern is correct (env var references, not hardcoded values), but the source of those vars is insecure. Options: (1) macOS Keychain via `security find-generic-password` in a sourced script, (2) `.env` file with restricted permissions (`chmod 600`) sourced from `.zshrc`, (3) 1Password CLI (`op read`). Whichever approach, the keys must still be available as env vars at shell startup so Claude Code can resolve them when spawning MCP servers.
+- **Acceptance:** API keys no longer appear in plaintext in any version-controllable or widely-readable file. MCP servers still start correctly.
 
 ## Completed
 

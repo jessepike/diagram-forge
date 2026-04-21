@@ -38,7 +38,7 @@ async def generate_diagram(body: GenerateRequest) -> GenerateResponse:
     if body.provider == "auto":
         raise HTTPException(
             status_code=400,
-            detail="Provider 'auto' is not supported; choose 'gemini', 'openai', or 'replicate'",
+            detail="Provider 'auto' is not supported; choose 'gemini' or 'openai'",
         )
 
     # Build the prompt from template + user content

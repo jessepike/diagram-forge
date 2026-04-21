@@ -33,7 +33,6 @@ class ProviderName(str, Enum):
 
     GEMINI = "gemini"
     OPENAI = "openai"
-    REPLICATE = "replicate"
 
 
 class Resolution(str, Enum):
@@ -62,6 +61,19 @@ class AspectRatio(str, Enum):
     STANDARD = "4:3"
 
 
+class Quality(str, Enum):
+    """Output quality tiers (gpt-image-2 / gpt-image-1-mini).
+
+    Cost scales dramatically with quality — high can be ~30x low.
+    `auto` lets the provider choose; typically resolves to medium for diagrams.
+    """
+
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    AUTO = "auto"
+
+
 class BillingModel(str, Enum):
     """How a provider charges."""
 
@@ -82,6 +94,7 @@ class GenerationConfig(BaseModel):
     resolution: Resolution = Resolution.RES_2K
     aspect_ratio: AspectRatio = AspectRatio.WIDE
     temperature: float = Field(default=1.0, ge=0.0, le=2.0)
+    quality: Quality = Quality.AUTO
     style_reference_path: Path | None = None
     output_path: Path | None = None
     reference_images: list[Path] = Field(default_factory=list)
@@ -184,6 +197,7 @@ class DiagramTemplate(BaseModel):
     color_system: TemplateColorSystem | None = None
     recommended_provider: str | None = None
     recommended_model: str | None = None
+    recommended_quality: str | None = None  # low|medium|high — applied when caller passes quality="auto"
     prompt_template: str
     variables: dict[str, str] = Field(default_factory=dict)
 
@@ -208,6 +222,66 @@ class StyleReference(BaseModel):
         if not v.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp"}:
             raise ValueError(f"Style reference must be an image file, got: {v.suffix}")
         return v
+
+
+# --- Global Design Tokens ---
+
+
+class DesignTokenAesthetic(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    style: str = "minimal"
+    flat: bool = True
+    shadows: bool = False
+    gradients: bool = False
+    whitespace: str = "generous"
+
+
+class DesignTokenTypography(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    font: str = "Inter, sans-serif"
+    weight: str = "bold"
+    title_size: str = "24pt"
+    heading_size: str = "18pt"
+    body_size: str = "14pt"
+    caption_size: str = "11pt"
+    min_readable_size: str = "11pt"
+
+
+class DesignTokenColors(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    background: str = "#FFFFFF"
+    surface: str = "#F7F7F8"
+    border: str = "#E1E1E1"
+    border_strong: str = "#C7C7C7"
+    text_primary: str = "#1A1A1A"
+    text_secondary: str = "#6B7280"
+    accent: str = "#5E6AD2"
+    accent_muted: str = "#E8E9F8"
+    positive: str = "#26A65B"
+    warning: str = "#F0A92E"
+    negative: str = "#E5484D"
+
+
+class DesignTokenRendering(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    corners: str = "slightly rounded (4px)"
+    border_style: str = "1px solid"
+    arrow_color: str = "#6B7280"
+    arrow_style: str = "clean, minimal arrowheads"
+    icon_style: str = "simple line-art, monochromatic"
+
+
+class GlobalDesignTokens(BaseModel):
+    model_config = ConfigDict(extra="allow")
+
+    aesthetic: DesignTokenAesthetic = Field(default_factory=DesignTokenAesthetic)
+    typography: DesignTokenTypography = Field(default_factory=DesignTokenTypography)
+    colors: DesignTokenColors = Field(default_factory=DesignTokenColors)
+    rendering: DesignTokenRendering = Field(default_factory=DesignTokenRendering)
 
 
 # --- Provider Config ---
@@ -235,6 +309,8 @@ class AppConfig(BaseModel):
 
     version: int = 1
     default_provider: ProviderName = ProviderName.GEMINI
+    provider_fallback_chain: list[str] = Field(default_factory=list)
+    design_tokens: GlobalDesignTokens = Field(default_factory=GlobalDesignTokens)
     output_directory: str = "~/.diagram-forge/output"
     styles_directory: str = "~/.diagram-forge/styles"
     database_path: str = "~/.diagram-forge/usage.db"

@@ -26,7 +26,6 @@ class TestLoadConfig:
         config = load_config()
         assert "gemini" in config.providers
         assert "openai" in config.providers
-        assert "replicate" in config.providers
 
     def test_load_config_from_custom_path(self, tmp_dir):
         """Loading from a custom YAML path should work."""

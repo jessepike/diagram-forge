@@ -7,6 +7,8 @@ supports:
   - custom
   - freeform
 
+recommended_quality: medium
+
 style_defaults:
   background: "white"
   font: "sans-serif"

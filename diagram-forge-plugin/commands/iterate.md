@@ -26,7 +26,7 @@ You are helping the user refine an existing diagram using the diagram-forge `edi
    - Add connections or data flows
    - Improve legibility
 
-3. **Select provider**: Use the same provider that generated the original diagram if known. Gemini and OpenAI support editing; Replicate has limited edit support.
+3. **Select provider**: Use the same provider that generated the original diagram if known. Gemini and OpenAI both support editing.
 
 4. **Execute edit**: Call `edit_diagram` with the image path, edit instructions, and provider.
 

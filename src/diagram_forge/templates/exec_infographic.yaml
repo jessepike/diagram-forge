@@ -8,6 +8,8 @@ supports:
   - overview_architecture
   - presentation
 
+recommended_quality: high
+
 style_defaults:
   background: "white"
   font: "bold sans-serif"

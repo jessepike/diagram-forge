@@ -3,12 +3,14 @@
 from diagram_forge.providers.base import BaseImageProvider
 from diagram_forge.providers.gemini import GeminiProvider
 from diagram_forge.providers.openai_provider import OpenAIProvider
-from diagram_forge.providers.replicate_provider import ReplicateProvider
 
 PROVIDER_MAP: dict[str, type[BaseImageProvider]] = {
     "gemini": GeminiProvider,
-    "openai": OpenAIProvider,
-    "replicate": ReplicateProvider,
+    "gemini_flash": GeminiProvider,        # legacy alias
+    "gemini_flash_31": GeminiProvider,     # gemini-3.1-flash-image (current default)
+    "gemini_flash_25": GeminiProvider,     # gemini-2.5-flash-image (deprecated, shut down Jan 2026)
+    "openai": OpenAIProvider,              # default: gpt-image-2-2026-04-21
+    "openai_mini": OpenAIProvider,         # gpt-image-1-mini (cheap tier, opt-in)
 }
 
 
@@ -24,7 +26,6 @@ __all__ = [
     "BaseImageProvider",
     "GeminiProvider",
     "OpenAIProvider",
-    "ReplicateProvider",
     "PROVIDER_MAP",
     "get_provider",
 ]

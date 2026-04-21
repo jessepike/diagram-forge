@@ -17,7 +17,6 @@ Railway auto-detects the Dockerfile via `railway.toml`.
 | `ALLOWED_ORIGINS` | Yes | Comma-separated allowed CORS origins (e.g. `https://your-app.vercel.app`) |
 | `GEMINI_API_KEY` | Yes* | Google Gemini provider key |
 | `OPENAI_API_KEY` | Yes* | OpenAI GPT Image provider key |
-| `REPLICATE_API_TOKEN` | Yes* | Replicate Flux provider key |
 
 *At least one provider key required.
 

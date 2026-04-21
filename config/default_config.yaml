@@ -1,19 +1,33 @@
 version: 1
 default_provider: gemini
+provider_fallback_chain:
+  - gemini
+  - gemini_flash_31
+  - openai
 output_directory: ~/.diagram-forge/output
 styles_directory: ~/.diagram-forge/styles
 database_path: ~/.diagram-forge/usage.db
 
 providers:
+  # Gemini image generation models (all share GEMINI_API_KEY, require paid tier)
   gemini:
     enabled: true
-    model: gemini-3-pro-image-preview
+    model: gemini-3-pro-image   # Nano Banana Pro — best quality, advanced text rendering (preview shut down Mar 2026)
+    api_key_env: GEMINI_API_KEY
+  gemini_flash_31:
+    enabled: true
+    model: gemini-3.1-flash-image  # Nano Banana 2 — fast, high-efficiency (preview suffix dropped)
+    api_key_env: GEMINI_API_KEY
+  gemini_flash_25:
+    enabled: true
+    model: gemini-2.5-flash-image          # DEPRECATED — shut down Jan 2026. Kept as fallback reference only.
+    enabled: false
     api_key_env: GEMINI_API_KEY
   openai:
     enabled: true
-    model: gpt-image-1.5
+    model: gpt-image-2-2026-04-21
     api_key_env: OPENAI_API_KEY
-  replicate:
-    enabled: true
-    model: black-forest-labs/flux-schnell
-    api_key_env: REPLICATE_API_TOKEN
+  openai_mini:
+    enabled: false          # opt-in — ~4x cheaper than gpt-image-2, lower fidelity
+    model: gpt-image-1-mini
+    api_key_env: OPENAI_API_KEY

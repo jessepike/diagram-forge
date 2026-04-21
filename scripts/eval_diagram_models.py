@@ -91,8 +91,6 @@ def estimate_case_cost(provider_name: str, resolution: str) -> float:
         return 0.039
     if provider_name == "openai":
         return 0.011 if resolution == "1K" else 0.016
-    if provider_name == "replicate":
-        return 0.006
     return 0.05
 
 

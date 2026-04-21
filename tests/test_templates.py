@@ -36,13 +36,14 @@ class TestLoadTemplate:
 
 class TestLoadAllTemplates:
     def test_loads_all_templates(self):
-        """Should load all 9 bundled templates."""
+        """Should load all 13 bundled templates."""
         templates = load_all_templates()
-        assert len(templates) == 9
+        assert len(templates) == 13
         expected = {
             "architecture", "data_flow", "component",
             "sequence", "integration", "infographic", "generic",
             "c4_container", "exec_infographic",
+            "brand_infographic", "product_roadmap", "workstreams", "kanban",
         }
         assert set(templates.keys()) == expected
 

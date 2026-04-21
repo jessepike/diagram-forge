@@ -1,0 +1,39 @@
+# Global Design Tokens — Linear-inspired aesthetic
+# Base layer applied to all diagram types.
+# Template-level style_defaults and color_system override where needed.
+
+aesthetic:
+  style: minimal
+  flat: true
+  shadows: false
+  gradients: false
+  whitespace: generous
+
+typography:
+  font: "Inter, sans-serif"
+  weight: bold
+  title_size: "24pt"
+  heading_size: "18pt"
+  body_size: "14pt"
+  caption_size: "11pt"
+  min_readable_size: "11pt"
+
+colors:
+  background: "#FFFFFF"
+  surface: "#F7F7F8"
+  border: "#E1E1E1"
+  border_strong: "#C7C7C7"
+  text_primary: "#1A1A1A"
+  text_secondary: "#6B7280"
+  accent: "#5E6AD2"
+  accent_muted: "#E8E9F8"
+  positive: "#26A65B"
+  warning: "#F0A92E"
+  negative: "#E5484D"
+
+rendering:
+  corners: "slightly rounded (4px)"
+  border_style: "1px solid"
+  arrow_color: "#6B7280"
+  arrow_style: "clean, minimal arrowheads"
+  icon_style: "simple line-art, monochromatic"

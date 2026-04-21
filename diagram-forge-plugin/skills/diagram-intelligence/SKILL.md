@@ -10,67 +10,53 @@ description: >
 
 # Diagram Intelligence Skill
 
-You have access to the **diagram-forge** MCP server with these tools:
-- `generate_diagram` — Generate a new diagram from a text prompt
-- `edit_diagram` — Edit an existing diagram with instructions
-- `list_templates` — Show available diagram templates
-- `list_providers` — Show configured providers and their status
-- `list_styles` — Show available style references
-- `get_usage_report` — View generation costs and usage
-- `configure_provider` — Set up an API key for a provider
+When triggered, generate the diagram immediately. Do not present a menu of options or ask what type of diagram — infer it from the user's request and go.
 
-## When Triggered
+## MCP Tools
 
-When the user asks to create or visualize a diagram:
+Call these directly:
+- `mcp__diagram-forge__generate_diagram` — Generate a diagram from a prompt
+- `mcp__diagram-forge__edit_diagram` — Edit an existing diagram
+- `mcp__diagram-forge__list_templates` — List available templates
+- `mcp__diagram-forge__list_providers` — Check provider availability
+- `mcp__diagram-forge__list_styles` — List style references
 
-1. **Assess the request**: Determine the diagram type (architecture, data flow, sequence, component, integration, infographic, or generic)
+## Behavior
 
-2. **Check provider availability**: Call `list_providers` to see which providers are configured. If none have API keys, guide the user to set one up with `configure_provider` or by setting the environment variable.
+1. **Infer diagram type** from the request. Default to `architecture`. Map keywords:
+   - "data flow", "pipeline", "ETL" → `data_flow`
+   - "sequence", "timeline" → `sequence`
+   - "components", "modules" → `component`
+   - "integration", "APIs" → `integration`
+   - "infographic", "summary" → `infographic`
+   - Everything else → `architecture`
 
-3. **Context gathering**: If the user wants to diagram their current project, use the Explore agent or read key files (CLAUDE.md, README, architecture docs) to understand the system.
+2. **Build a detailed prompt** from the user's description. Enhance it with:
+   - "All text crystal clear and perfectly legible"
+   - "Professional, publication-ready"
+   - Explicit layout structure (layers, columns, flow direction)
+   - Named components with relationships
 
-4. **Template selection**: Match the request to the best template. Call `list_templates` for options.
+3. **Call `mcp__diagram-forge__generate_diagram`** with:
+   - `prompt`: the enhanced prompt
+   - `diagram_type`: inferred type
+   - `resolution`: "2K"
+   - `aspect_ratio`: "16:9"
 
-5. **Prompt engineering**: Build a detailed, structured prompt that includes:
-   - Clear component descriptions
-   - Layer organization
-   - Connection definitions
-   - Color coding rules
-   - Legibility and quality instructions
+4. **Show result**: output path and cost. Offer `/iterate` for refinements.
 
-6. **Style matching**: If style references are available (`list_styles`), suggest matching ones.
+## Do NOT
+- Present a menu asking what kind of diagram to create
+- Ask the user to pick a template or provider
+- Ask for confirmation before generating
+- Say "what do you want to visualize?"
 
-7. **Generate**: Call `generate_diagram` with the assembled parameters.
-
-8. **Iterate**: Offer refinement via `edit_diagram` or regeneration with adjusted prompts.
+If the user said "create a diagram of X", you already know what X is. Generate it.
 
 ## Prompt Engineering Tips
 
-- Be explicit about layout (top-to-bottom layers, left-to-right flow, etc.)
-- Specify color coding rules clearly — colors should encode meaning
-- Always include "All text crystal clear and perfectly legible"
-- For architecture diagrams, organize components into named layers
-- For data flow, specify swim lanes and arrow directions
+- Be explicit about layout (top-to-bottom layers, left-to-right flow)
+- Name every element — don't say "show inputs", list each input by name
+- Specify color coding rules — colors should encode meaning
+- For architecture diagrams, organize into named layers
 - Include a legend for any color coding used
-
-## High-Quality Diagram Rules (from AFAS reference diagrams)
-
-These rules produced the highest-quality outputs in the AFAS series. Apply generally:
-
-1. **Name every element verbatim** — don't say "show inputs." List each input box by name.
-2. **Specify the style reference image** — it anchors the visual grammar. Use `list_styles` to find the best match.
-3. **Write the tagline text in the prompt** — the model can't guess your best closing line.
-4. **Use the full style boilerplate every time** — don't abbreviate color/font specs.
-5. **Describe layout structure first** (columns, rings, flow direction), then fill with content.
-6. **Use dashed boundaries for optional/separate/isolated elements** — the model renders them correctly when specified explicitly.
-7. **Constrain color use explicitly** — name which elements get which hex codes.
-8. **Specify `aspect_ratio: 16:9` and `resolution: 2K`** — never leave these to defaults for production diagrams.
-
-## Style Reference Matching Guide
-
-| Diagram Type | Best Style Reference |
-|---|---|
-| Circular / ring / loop / cycle | `afas-control-plane-loop` |
-| Spectrum / progression / three-column | `afas-escalation-spectrum` |
-| Blueprint / flow / layered | `c4-container` or `data-flow` |
-| Executive summary / infographic | `exec-infographic` |

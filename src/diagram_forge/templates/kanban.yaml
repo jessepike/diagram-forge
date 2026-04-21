@@ -8,6 +8,8 @@ supports:
   - sprint_board
   - task_board
 
+recommended_quality: medium
+
 style_defaults:
   background: "white"
   font: "bold sans-serif"

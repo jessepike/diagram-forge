@@ -8,6 +8,8 @@ supports:
   - container
   - software_architecture
 
+recommended_quality: medium
+
 style_defaults:
   background: "white"
   font: "bold sans-serif"

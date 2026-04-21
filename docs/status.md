@@ -62,7 +62,6 @@
 - [x] Provider abstraction — BaseImageProvider ABC (base.py)
 - [x] Gemini provider (google-genai SDK)
 - [x] OpenAI provider (openai SDK, GPT Image)
-- [x] Replicate provider (replicate SDK, Flux)
 - [x] Template engine + 13 YAML templates
 - [x] Style manager for reference images
 - [x] SQLite cost tracker with reporting

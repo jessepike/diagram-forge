@@ -91,7 +91,6 @@ class TestServerImport:
         from diagram_forge.providers import PROVIDER_MAP, get_provider
         assert "gemini" in PROVIDER_MAP
         assert "openai" in PROVIDER_MAP
-        assert "replicate" in PROVIDER_MAP
 
     def test_models_import(self):
         """All models should import cleanly."""

@@ -9,6 +9,8 @@ supports:
   - pitch_deck
   - brand
 
+recommended_quality: high
+
 style_defaults:
   background: "cream/off-white (#F5F0E8 or similar warm off-white)"
   font: "serif headline (Playfair Display or similar) + clean sans-serif body"

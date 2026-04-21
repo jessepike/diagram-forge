@@ -13,7 +13,7 @@ Instead of wrestling with diagramming tools or manually crafting image generatio
 ## Features
 
 - **13 diagram templates** — Architecture (TOGAF), C4 Container, Executive Infographic, data flow, component, sequence, integration, infographic, generic, product roadmap, workstreams, kanban, and brand infographic
-- **3 image providers** — Google Gemini (recommended), OpenAI (GPT Image), Replicate (Flux)
+- **2 image providers** — Google Gemini (recommended), OpenAI (GPT Image)
 - **Auto provider selection** — Each template recommends the best provider/model for its diagram type
 - **Template-driven prompts** — YAML templates with hex-coded color systems, explicit rendering instructions, and layout rules
 - **Style references** — Feed a visual example to guide output consistency (Gemini)
@@ -43,7 +43,6 @@ Set at least one API key:
 ```bash
 export GEMINI_API_KEY="your-key"       # Google Gemini (recommended)
 export OPENAI_API_KEY="your-key"       # OpenAI GPT Image
-export REPLICATE_API_TOKEN="your-key"  # Replicate Flux
 ```
 
 ### 3. Add to your MCP client
@@ -143,7 +142,7 @@ To use, install the plugin or add the `.mcp.json` from the plugin directory.
 
 1. **Template selection** — Matches your request to one of 13 YAML templates, each encoding proven prompt patterns (color systems, layer organization, legibility rules)
 2. **Prompt rendering** — Merges your description with the template, substituting variables and applying style defaults
-3. **Provider dispatch** — Sends the engineered prompt to your chosen provider (Gemini, OpenAI, or Replicate)
+3. **Provider dispatch** — Sends the engineered prompt to your chosen provider (Gemini or OpenAI)
 4. **Image handling** — Saves the generated image, records cost and metadata to SQLite
 5. **Iteration** — Edit existing diagrams with natural language instructions via providers that support image editing
 
@@ -189,7 +188,6 @@ src/diagram_forge/
     base.py              # BaseImageProvider ABC
     gemini.py            # Google Gemini
     openai_provider.py   # OpenAI GPT Image
-    replicate_provider.py # Replicate Flux
   templates/             # 13 YAML prompt templates
 ```
 

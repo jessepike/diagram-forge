@@ -1,3 +1,8 @@
+---
+type: "intent"
+updated: "2026-02-12"
+---
+
 # Diagram Forge — Intent (ADF Discover)
 
 ## Problem Statement
@@ -13,7 +18,7 @@ Generating enterprise-grade architecture diagrams requires a repeatable workflow
 ## Solution
 **diagram-forge**: A standalone MCP server that encapsulates the diagram generation workflow:
 - Template-driven prompt engineering for 7 diagram types
-- Swappable provider architecture (Gemini, OpenAI, Replicate)
+- Swappable provider architecture (Gemini, OpenAI)
 - Style reference image management
 - SQLite-backed cost tracking and reporting
 - pip-installable, cross-client via stdio transport
@@ -29,7 +34,7 @@ Generating enterprise-grade architecture diagrams requires a repeatable workflow
 |----------|--------|-----------|
 | Language | Python 3.11+ | Image ecosystem, provider SDKs, MCP server consistency |
 | Framework | FastMCP (mcp>=1.0.0) | Proven pattern, pythonic decorators |
-| Providers | Gemini + OpenAI + Replicate | Validates swappable architecture, covers ecosystems |
+| Providers | Gemini + OpenAI | Validates swappable architecture, covers ecosystems |
 | Transport | stdio | Maximum client compatibility |
 | Cost tracking | SQLite | Lightweight, portable, no external deps |
 | Templates | YAML | Human-editable, version-controllable |

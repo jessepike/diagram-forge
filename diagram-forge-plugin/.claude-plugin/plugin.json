@@ -1,8 +1,22 @@
 {
   "name": "diagram-forge",
-  "description": "AI-powered architecture diagram generation — create enterprise-grade diagrams from natural language using Gemini, OpenAI, or Replicate",
+  "description": "AI-powered architecture diagram generation — create enterprise-grade diagrams from natural language using Gemini or OpenAI",
   "version": "0.1.0",
   "author": {
     "name": "Jesse Pike"
+  },
+  "userConfig": {
+    "gemini_api_key": {
+      "title": "Gemini API Key",
+      "description": "Google Gemini API key for image generation",
+      "type": "string",
+      "sensitive": true
+    },
+    "openai_api_key": {
+      "title": "OpenAI API Key",
+      "description": "OpenAI API key for GPT Image generation",
+      "type": "string",
+      "sensitive": true
+    }
   }
 }

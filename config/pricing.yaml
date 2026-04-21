@@ -1,28 +1,60 @@
 # Provider pricing rates — update as pricing changes
-# Last updated: 2026-02-11
+# Last updated: 2026-04-21
+# Source: https://developers.openai.com/api/docs/guides/image-generation
 
 providers:
   gemini:
-    model: gemini-2.5-flash-image
+    model: gemini-3.1-flash-image
     billing_model: per_image
     cost_per_image: 0.039
-    notes: "Gemini image generation pricing"
+    notes: "Gemini 3.1 Flash Image (Nano Banana 2) — verify pricing against current Gemini API docs"
 
   openai:
-    model: gpt-image-1
+    model: gpt-image-2-2026-04-21
     billing_model: per_image
+    # OpenAI bills on tokens (input $8/1M, cached $2/1M, output $30/1M)
+    # but exposes per-image cost estimates via the docs calculator. Table below
+    # is per-image cost in USD at each (size, quality) combination.
     costs:
       1024x1024:
-        standard: 0.011
-        hd: 0.022
+        low: 0.006
+        medium: 0.053
+        high: 0.211
       1536x1024:
-        standard: 0.016
-        hd: 0.032
-    notes: "OpenAI GPT Image 1 pricing varies by size and quality"
+        low: 0.005
+        medium: 0.041
+        high: 0.165
+      1024x1536:
+        low: 0.005
+        medium: 0.041
+        high: 0.165
+    notes: "gpt-image-2 per-image cost. `auto` quality estimated as `medium`."
 
-  replicate:
-    model: black-forest-labs/flux-schnell
-    billing_model: per_second
-    cost_per_second: 0.003
-    typical_generation_seconds: 2
-    notes: "Replicate charges per second of GPU time"
+  openai_mini:
+    model: gpt-image-1-mini
+    billing_model: per_image
+    # Roughly 4x cheaper than gpt-image-2 at medium/high tiers.
+    costs:
+      1024x1024:
+        low: 0.005
+        medium: 0.011
+        high: 0.036
+      1536x1024:
+        low: 0.006
+        medium: 0.015
+        high: 0.052
+      1024x1536:
+        low: 0.006
+        medium: 0.015
+        high: 0.052
+    notes: "gpt-image-1-mini — cheap alternative for bulk generation or drafts"
+
+  # Legacy reference — still accessible via explicit model override
+  openai_legacy_15:
+    model: gpt-image-1.5
+    billing_model: per_image
+    costs:
+      1024x1024: 0.009
+      1536x1024: 0.013
+      1024x1536: 0.013
+    notes: "gpt-image-1.5 — flat-rate, no quality tier. Output tokens $32/1M vs $30 for gpt-image-2."

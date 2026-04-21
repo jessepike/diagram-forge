@@ -8,6 +8,8 @@ supports:
   - project_status
   - kanban_overview
 
+recommended_quality: medium
+
 style_defaults:
   background: "white"
   font: "bold sans-serif"

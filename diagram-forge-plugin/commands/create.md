@@ -1,38 +1,38 @@
 ---
-name: create
-description: Generate an architecture diagram with guided workflow
+name: diagram-create
+description: Generate a diagram. Pass a prompt describing what to visualize.
 arguments:
-  - name: description
-    description: What to diagram (optional — will ask if not provided)
-    required: false
+  - name: prompt
+    description: What to diagram
+    required: true
 ---
 
-# Diagram Creation Workflow
+# Diagram Create
 
-You are orchestrating a diagram generation workflow using the diagram-forge MCP tools.
+Generate a diagram immediately from the user's prompt. Do not ask clarifying questions — just build it.
 
 ## Steps
 
-1. **Understand the request**: If the user provided a description argument, use it. Otherwise, ask what they want to diagram.
+1. **Infer diagram type** from the prompt. Default to `architecture` if unclear. Map keywords:
+   - "data flow", "pipeline", "ETL" → `data_flow`
+   - "sequence", "timeline", "interaction" → `sequence`
+   - "components", "modules" → `component`
+   - "integration", "connections", "APIs" → `integration`
+   - "infographic", "summary", "overview" → `infographic`
+   - Everything else → `architecture`
 
-2. **Gather context**: Use the `context-gatherer` agent (Task tool with subagent_type) to explore the current project and understand the architecture. Pass the user's description to the agent.
+2. **Call `mcp__diagram-forge__generate_diagram`** with:
+   - `prompt`: the user's prompt text, enhanced with "All text crystal clear and perfectly legible. Professional, publication-ready."
+   - `diagram_type`: inferred from step 1
+   - `resolution`: "2K"
+   - `aspect_ratio`: "16:9"
 
-3. **Select template**: Call `list_templates` to show available diagram types. Based on the user's request, recommend the best template. Let the user confirm or choose differently.
+3. **Show the result**: output path and a one-line cost summary. Mention `/iterate` for refinements.
 
-4. **Determine provider**: Call `list_providers` to check which providers have API keys configured. Recommend the best available provider (prefer Gemini for architecture diagrams). Inform the user if no providers have keys set.
+Do NOT:
+- Ask the user to pick a template
+- Ask the user to pick a provider
+- Ask for confirmation before generating
+- Show the prompt before generating
 
-5. **Build the prompt**: Combine the gathered context with the user's description. Use clear, structured language that describes:
-   - Components and their relationships
-   - Layers/groupings
-   - Connection types
-   - Color coding requirements
-
-6. **Generate**: Call `generate_diagram` with the assembled prompt, selected template type, provider, and any style reference.
-
-7. **Present results**: Show the output path and offer to iterate with `/diagram:iterate`.
-
-## Guidelines
-- Always show the user the prompt before generating (ask for confirmation)
-- Suggest style references if available (call `list_styles`)
-- Default to 2K resolution, 16:9 aspect ratio for architecture diagrams
-- Track costs — mention the estimated cost before generating
+Just generate it.
