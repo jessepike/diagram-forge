@@ -12,11 +12,11 @@ providers:
   # Gemini image generation models (all share GEMINI_API_KEY, require paid tier)
   gemini:
     enabled: true
-    model: gemini-3-pro-image   # Nano Banana Pro — best quality, advanced text rendering (preview shut down Mar 2026)
+    model: gemini-3-pro-image-preview   # Nano Banana Pro — best quality, advanced text rendering, up to 6 reference images
     api_key_env: GEMINI_API_KEY
   gemini_flash_31:
     enabled: true
-    model: gemini-3.1-flash-image  # Nano Banana 2 — fast, high-efficiency (preview suffix dropped)
+    model: gemini-3.1-flash-image-preview  # Nano Banana 2 — fast, up to 14 reference images, 4K, thinking levels
     api_key_env: GEMINI_API_KEY
   gemini_flash_25:
     enabled: true

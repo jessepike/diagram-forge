@@ -119,9 +119,77 @@
 
 ### B20: Move API keys out of plaintext ~/.zshrc
 - **Priority:** P0
-- **Status:** Pending
+- **Status:** Pending — now also blocking OSS launch
 - **Details:** GEMINI_API_KEY and OPENAI_API_KEY are exported as plaintext in `~/.zshrc` (lines 57-58). This was set up for diagram-forge's MCP config which reads `${GEMINI_API_KEY}` / `${OPENAI_API_KEY}` env vars. The MCP `.mcp.json` pattern is correct (env var references, not hardcoded values), but the source of those vars is insecure. Options: (1) macOS Keychain via `security find-generic-password` in a sourced script, (2) `.env` file with restricted permissions (`chmod 600`) sourced from `.zshrc`, (3) 1Password CLI (`op read`). Whichever approach, the keys must still be available as env vars at shell startup so Claude Code can resolve them when spawning MCP servers.
 - **Acceptance:** API keys no longer appear in plaintext in any version-controllable or widely-readable file. MCP servers still start correctly.
+
+### B21: Rotate exposed API keys (post-f1fbc38 leak)
+- **Priority:** P0 — do this BEFORE any OSS launch or further push activity
+- **Status:** Pending
+- **Details:** On 2026-04-21, GitHub push protection caught commit `f1fbc38` containing `.env` with literal `OPENAI_API_KEY` and `GEMINI_API_KEY`. The commit never reached GitHub (push rejected, history rewritten to `5e72c66`, force-pushed clean). But the keys existed in plaintext on local disk in git history. Treat as compromised.
+- **Acceptance:**
+  1. Revoke the OpenAI key that was in `f1fbc38` at https://platform.openai.com/api-keys (inspect the commit locally via `git show backup-f1fbc38 -- .env` to confirm the exact key before revoking)
+  2. Revoke the Gemini key that was in `f1fbc38` at https://aistudio.google.com/apikey
+  3. Issue replacements
+  4. Update: local `.env`, Railway env vars, Vercel env vars, any `~/.zshrc` exports
+  5. Delete local backup tags: `git tag -d backup-before-cleanup backup-f1fbc38`
+
+### B22: OSS launch prep — repo polish
+- **Priority:** P1 (blocking OSS launch)
+- **Status:** Pending
+- **Details:** Current repo is private-quality. Needs OSS-grade polish before HN/X launch.
+- **Tasks:**
+  1. Delete `diagram-forge-plugin/.mcp.json.bak` — encodes the insecure shell-export pattern, misleading for OSS users. Live `.mcp.json` already uses `${user_config.*}` interpolation correctly.
+  2. Add `.env.example` to repo with placeholder values for `GEMINI_API_KEY`, `OPENAI_API_KEY`. Commit to repo; users copy to `.env` (gitignored).
+  3. README overhaul:
+     - Hero section with 3-4 best generated diagrams
+     - Clear "Getting started" by install mode (Claude Code plugin | pip install CLI | self-hosted web)
+     - "Getting your keys" section linking OpenAI + Google key pages
+     - Architecture diagram (built with diagram-forge itself — meta/demo)
+     - Cost comparison table (gpt-image-2 vs Gemini vs gpt-image-1-mini)
+     - License badge, install badge, test badge, PyPI badge
+     - Demo video embed (30s screencast)
+     - Link to live BYOK demo
+  4. Pick license (MIT recommended — HN-friendly, permissive, zero friction)
+  5. Add `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md` (basic stubs)
+  6. Add GitHub issue + PR templates
+  7. Ensure `pyproject.toml` has complete metadata (author, classifiers, homepage, docs URL, repository URL)
+- **Acceptance:** Repo reads as professional, open-source-ready. Someone landing cold can understand what it is, install it, and contribute.
+
+### B23: OSS launch prep — BYOK demo site
+- **Priority:** P1 (demo infrastructure for launch)
+- **Status:** Pending
+- **Details:** Modify the live Vercel/Railway demo so visitors can try generation with their OWN API key pasted into the UI. Zero cost to project owner, defensible security posture. Key must never be logged or stored server-side.
+- **Implementation approach:**
+  - Frontend: add "Use your own key" field (password input, `sensitive`, not persisted in localStorage by default — maybe session storage with explicit opt-in)
+  - Backend: accept `X-User-Gemini-Key` / `X-User-OpenAI-Key` headers, use instead of server env vars for that request only
+  - NEVER log, never store, never cache
+  - Add rate limit (10 req/min per IP) even with BYOK to prevent abuse of the infrastructure itself
+  - Clear privacy notice: "Your key is sent directly to OpenAI/Google, never stored on our servers. Inspect the code."
+- **Acceptance:** User can paste their key into the demo, generate diagrams, and the project owner pays $0 for demo usage.
+
+### B24: OSS launch prep — static demo gallery
+- **Priority:** P1 (primary "demo" for readers who don't click BYOK)
+- **Status:** Pending
+- **Details:** Generate and commit a curated gallery of 20-30 example diagrams covering every template × key style reference × both providers. These are the portfolio pieces that sell the project to HN readers who won't bother clicking anything.
+- **Tasks:**
+  - One best example per template (13 images minimum)
+  - Provider comparison: same prompt, Gemini vs gpt-image-2, side by side (at least 3 pairs)
+  - Style reference showcase (agent-capabilities-card, minimal-kanban, exec-infographic)
+  - Organize in `docs/gallery/` with an index MD
+  - README hero + landing page hero pull from this gallery
+- **Acceptance:** Gallery is the first impression. Someone scrolling the README in 15 seconds should walk away thinking "this is legitimately good."
+
+### B25: OSS launch prep — 30-second screencast demo
+- **Priority:** P2
+- **Status:** Pending
+- **Details:** Short screen recording: prompt typed → diagram appears → iteration. Embed in README (GIF or YouTube). Zero infra cost, high conversion.
+
+### B26: OSS launch prep — PyPI publish
+- **Priority:** P2 (supersedes B13)
+- **Status:** Pending
+- **Details:** Publish `diagram-forge` to PyPI so `pip install diagram-forge` works. Required for the "Python library direct" install mode to feel legitimate.
+- **Blocks:** README install instructions, HN "Show HN" post credibility.
 
 ## Completed
 
