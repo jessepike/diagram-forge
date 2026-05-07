@@ -117,8 +117,8 @@ def create_server(config_path: str | None = None) -> Any:
         Args:
             prompt: Description of what to generate
             diagram_type: Type of diagram (architecture|data_flow|component|sequence|integration|infographic|c4_container|exec_infographic|generic)
-            provider: Image generation provider (auto|gemini|openai). "auto" picks the best provider for the diagram type.
-            model: Override the default model for this provider (e.g. gpt-image-2-2026-04-21, gpt-image-1-mini, gemini-3-pro-image-preview)
+            provider: LEAVE AS DEFAULT ("auto"). The server is responsible for picking the right provider and model for the diagram type — callers should describe what to draw and let the server decide how. The current default chain is OpenAI gpt-image-2 (primary) → Gemini (fallback). Override only if you have a specific provider/model comparison need.
+            model: LEAVE UNSET unless you're explicitly benchmarking models. Server picks the right model for the chosen provider.
             resolution: Output resolution (1K|2K|4K)
             aspect_ratio: Output aspect ratio (16:9|1:1|9:16|4:3)
             style_reference: Style name or path to reference image

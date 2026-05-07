@@ -1,9 +1,12 @@
 version: 1
-default_provider: gemini
+# Default provider chain: OpenAI gpt-image-2 first, Gemini secondary.
+# Callers should leave provider="auto" and let the server pick — they
+# specify WHAT to draw, the server decides HOW.
+default_provider: openai
 provider_fallback_chain:
+  - openai
   - gemini
   - gemini_flash_31
-  - openai
 output_directory: ~/.diagram-forge/output
 styles_directory: ~/.diagram-forge/styles
 database_path: ~/.diagram-forge/usage.db
