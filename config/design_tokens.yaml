@@ -2,6 +2,15 @@
 # Base layer applied to all diagram types.
 # Template-level style_defaults and color_system override where needed.
 
+# Default background theme for ALL diagrams. One switch governs the default:
+#   light (default) — light/white canvas, dark text. The portfolio-wide default
+#                     (rep / marketing / CISO-facing output is the common case).
+#   dark            — charcoal canvas, light text.
+# Per-call overrides win: generate_diagram(theme="dark") flips a single diagram
+# without changing this default. The `colors` block below is the LIGHT palette;
+# dark swaps to a built-in dark preset (see GlobalDesignTokens.for_theme).
+theme: light
+
 aesthetic:
   style: minimal
   flat: true

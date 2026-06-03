@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 import yaml
 
-from diagram_forge.models import DiagramTemplate, DiagramType, GlobalDesignTokens
+from diagram_forge.models import DiagramTemplate, DiagramType, GlobalDesignTokens, Theme
 
 if TYPE_CHECKING:
     pass
@@ -30,7 +30,11 @@ def _get_default_tokens() -> GlobalDesignTokens:
 
 
 def build_global_style_block(tokens: GlobalDesignTokens) -> str:
-    """Render global design tokens as a concise prompt instruction block."""
+    """Render global design tokens as a concise prompt instruction block.
+
+    The leading BACKGROUND THEME line is authoritative: it states light vs dark
+    explicitly so it overrides any template-level background hint downstream.
+    """
     a = tokens.aesthetic
     t = tokens.typography
     c = tokens.colors
@@ -45,8 +49,22 @@ def build_global_style_block(tokens: GlobalDesignTokens) -> str:
         no_list.append("NO 3D effects")
     no_clause = ", ".join(no_list) if no_list else "clean rendering"
 
+    if tokens.theme == Theme.DARK:
+        theme_line = (
+            f"- BACKGROUND THEME: DARK. Use a dark canvas ({c.background}) for the ENTIRE image, "
+            f"edge to edge. All cards/surfaces {c.surface}. Light text on dark — this overrides "
+            f"any 'white background' hint elsewhere in this prompt."
+        )
+    else:
+        theme_line = (
+            f"- BACKGROUND THEME: LIGHT. Use a light/white canvas ({c.background}) for the ENTIRE "
+            f"image, edge to edge. Cards/surfaces {c.surface}. Dark text on light — this overrides "
+            f"any conflicting background hint elsewhere in this prompt."
+        )
+
     return (
         f"GLOBAL DESIGN STANDARDS (apply to all elements):\n"
+        f"{theme_line}\n"
         f"- Aesthetic: {a.style}, flat — {no_clause}, NO decorative embellishment\n"
         f"- Typography: {t.font} — title {t.title_size} {t.weight}, "
         f"headings {t.heading_size}, body {t.body_size}, minimum {t.min_readable_size}\n"
@@ -109,10 +127,18 @@ def render_prompt(
     # Inject global style block — templates can place {global_style_block} explicitly
     variables.setdefault("global_style_block", build_global_style_block(tokens))
 
-    # Build style defaults block
+    # Build style defaults block. Background is governed by the global theme
+    # (see build_global_style_block) so it stays consistent — the per-template
+    # background string is only used for the LIGHT default; under DARK we defer
+    # to the global theme directive to avoid a conflicting "white background" hint.
     sd = template.style_defaults
+    sd_background = (
+        "theme-governed (see global standards)"
+        if tokens.theme == Theme.DARK
+        else sd.background
+    )
     style_block = (
-        f"STYLE: {sd.background} background, {sd.font} font, "
+        f"STYLE: {sd_background} background, {sd.font} font, "
         f"{sd.corners} corners, {sd.borders} borders."
     )
     variables.setdefault("style_defaults_block", style_block)
@@ -156,14 +182,21 @@ def build_prompt(
     resolution: str = "2K",
     aspect_ratio: str = "16:9",
     design_tokens: GlobalDesignTokens | None = None,
+    theme: Theme | str | None = None,
 ) -> str:
     """High-level prompt builder: loads template, merges user content, returns final prompt.
 
     Global design tokens are injected as a preamble on all prompts.
     Templates that include {global_style_block} control placement; others get it prepended.
     If the diagram_type template doesn't exist or is 'generic', uses user_prompt directly.
+
+    `theme` (light|dark) selects the background theme for this call, overriding the
+    configured default. When None, the design_tokens' configured theme is used
+    (which itself defaults to light).
     """
     tokens = design_tokens or _get_default_tokens()
+    # Resolve tokens for the requested (or configured) theme — light is the default.
+    tokens = tokens.for_theme(theme)
     global_block = build_global_style_block(tokens)
 
     try:

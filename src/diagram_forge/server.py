@@ -19,6 +19,7 @@ from diagram_forge.models import (
     GenerationRecord,
     Quality,
     Resolution,
+    Theme,
 )
 from diagram_forge.providers import PROVIDER_MAP, get_provider
 from diagram_forge.style_manager import StyleManager
@@ -111,12 +112,17 @@ def create_server(config_path: str | None = None) -> Any:
         output_path: str | None = None,
         temperature: float = 1.0,
         quality: str = "auto",
+        theme: str = "light",
     ) -> dict:
         """Generate an architecture diagram from a text prompt.
 
         Args:
             prompt: Description of what to generate
             diagram_type: Type of diagram (architecture|data_flow|component|sequence|integration|infographic|c4_container|exec_infographic|generic)
+            theme: Background theme (light|dark). Default: light — the portfolio-wide
+                default (rep / marketing / CISO-facing output is the common case). Pass
+                theme="dark" for a dark charcoal canvas. This single switch governs the
+                background; you do NOT need to describe a background color in `prompt`.
             provider: LEAVE AS DEFAULT ("auto"). The server is responsible for picking the right provider and model for the diagram type — callers should describe what to draw and let the server decide how. The current default chain is OpenAI gpt-image-2 (primary) → Gemini (fallback). Override only if you have a specific provider/model comparison need.
             model: LEAVE UNSET unless you're explicitly benchmarking models. Server picks the right model for the chosen provider.
             resolution: Output resolution (1K|2K|4K)
@@ -153,6 +159,15 @@ def create_server(config_path: str | None = None) -> Any:
             chain = config.provider_fallback_chain or []
             candidates = [provider] + [p for p in chain if p != provider]
 
+        # Resolve theme — light is the default; dark on explicit request.
+        try:
+            theme_enum = Theme(theme.lower())
+        except ValueError:
+            return {
+                "status": "error",
+                "error": f"Invalid theme '{theme}'. Use 'light' (default) or 'dark'.",
+            }
+
         # Build the full prompt from template + user prompt (global tokens injected automatically)
         full_prompt = build_prompt(
             diagram_type=diagram_type,
@@ -160,6 +175,7 @@ def create_server(config_path: str | None = None) -> Any:
             resolution=resolution,
             aspect_ratio=aspect_ratio,
             design_tokens=config.design_tokens,
+            theme=theme_enum,
         )
 
         # Resolve style reference — inject description into prompt for text-only providers.

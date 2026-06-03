@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import pytest
 
-from diagram_forge.models import DiagramTemplate
+from diagram_forge.models import DiagramTemplate, GlobalDesignTokens, Theme
 from diagram_forge.template_engine import (
+    build_global_style_block,
     build_prompt,
     load_all_templates,
     load_template,
@@ -126,3 +127,46 @@ class TestBuildPrompt:
             aspect_ratio="1:1",
         )
         assert "4K" in prompt
+
+
+class TestTheme:
+    def test_default_tokens_are_light(self):
+        """Fresh tokens default to the light theme."""
+        assert GlobalDesignTokens().theme == Theme.LIGHT
+
+    def test_default_build_is_light(self):
+        """build_prompt with no theme emits a LIGHT background directive."""
+        prompt = build_prompt(diagram_type="exec_infographic", user_prompt="Test")
+        assert "BACKGROUND THEME: LIGHT" in prompt
+        assert "BACKGROUND THEME: DARK" not in prompt
+
+    def test_explicit_dark_build(self):
+        """theme='dark' emits a DARK background directive and dark canvas color."""
+        prompt = build_prompt(
+            diagram_type="exec_infographic", user_prompt="Test", theme="dark"
+        )
+        assert "BACKGROUND THEME: DARK" in prompt
+        assert "#0E1116" in prompt  # dark canvas color
+        # Per-template "STYLE: white background" hint is suppressed under dark
+        # (deferred to the theme directive) so there's no conflicting signal.
+        assert "STYLE: white background" not in prompt
+        assert "theme-governed" in prompt
+
+    def test_dark_then_light_independent(self):
+        """for_theme is non-mutating: requesting dark then light yields light again."""
+        base = GlobalDesignTokens()
+        dark = base.for_theme(Theme.DARK)
+        light = base.for_theme(Theme.LIGHT)
+        assert dark.theme == Theme.DARK
+        assert dark.colors.background == "#0E1116"
+        assert light.theme == Theme.LIGHT
+        assert light.colors.background == "#FFFFFF"
+        # Base is unchanged.
+        assert base.colors.background == "#FFFFFF"
+
+    def test_style_block_light_vs_dark(self):
+        """build_global_style_block reflects the token theme."""
+        light_block = build_global_style_block(GlobalDesignTokens())
+        dark_block = build_global_style_block(GlobalDesignTokens().for_theme(Theme.DARK))
+        assert "BACKGROUND THEME: LIGHT" in light_block
+        assert "BACKGROUND THEME: DARK" in dark_block

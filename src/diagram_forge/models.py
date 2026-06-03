@@ -35,6 +35,17 @@ class ProviderName(str, Enum):
     OPENAI = "openai"
 
 
+class Theme(str, Enum):
+    """Background theme for generated diagrams.
+
+    `light` is the portfolio-wide default (rep/marketing/CISO-facing output is the
+    common case). `dark` remains reachable on explicit request.
+    """
+
+    LIGHT = "light"
+    DARK = "dark"
+
+
 class Resolution(str, Enum):
     """Output resolution presets."""
 
@@ -275,13 +286,50 @@ class DesignTokenRendering(BaseModel):
     icon_style: str = "simple line-art, monochromatic"
 
 
+# Dark-theme color overrides. Mirrors the light DesignTokenColors fields but
+# inverts background/surface/text for a charcoal canvas. Accent + status colors
+# stay vivid enough to read on dark. Used only when theme == "dark".
+_DARK_COLOR_OVERRIDES: dict[str, str] = {
+    "background": "#0E1116",
+    "surface": "#1A1F29",
+    "border": "#2A2F3A",
+    "border_strong": "#3A414F",
+    "text_primary": "#F2F4F8",
+    "text_secondary": "#9AA4B2",
+    "accent": "#7C8AF0",
+    "accent_muted": "#252A3A",
+    "positive": "#3FBF6F",
+    "warning": "#F0B33E",
+    "negative": "#F0595D",
+}
+
+
 class GlobalDesignTokens(BaseModel):
     model_config = ConfigDict(extra="allow")
 
+    # Single switch governing default background. `light` is the portfolio
+    # default; set to `dark` (via config or the generate_diagram theme param)
+    # for a dark canvas. Per-call overrides win over this default.
+    theme: Theme = Theme.LIGHT
     aesthetic: DesignTokenAesthetic = Field(default_factory=DesignTokenAesthetic)
     typography: DesignTokenTypography = Field(default_factory=DesignTokenTypography)
     colors: DesignTokenColors = Field(default_factory=DesignTokenColors)
     rendering: DesignTokenRendering = Field(default_factory=DesignTokenRendering)
+
+    def for_theme(self, theme: Theme | str | None = None) -> GlobalDesignTokens:
+        """Return a copy of these tokens resolved for the given theme.
+
+        - `light` (default): tokens are returned unchanged (the YAML palette is light).
+        - `dark`: background/surface/text/accent colors are swapped to the dark preset.
+
+        Passing `None` uses `self.theme`. Per-call themes override the configured default.
+        """
+        resolved = Theme(theme) if theme is not None else self.theme
+        if resolved == Theme.LIGHT:
+            # Ensure the marker reflects the resolved theme even if it differs from self.theme.
+            return self.model_copy(update={"theme": Theme.LIGHT})
+        dark_colors = self.colors.model_copy(update=dict(_DARK_COLOR_OVERRIDES))
+        return self.model_copy(update={"theme": Theme.DARK, "colors": dark_colors})
 
 
 # --- Provider Config ---
