@@ -191,6 +191,15 @@
 - **Details:** Publish `diagram-forge` to PyPI so `pip install diagram-forge` works. Required for the "Python library direct" install mode to feel legitimate.
 - **Blocks:** README install instructions, HN "Show HN" post credibility.
 
+### B27: Railway → Vercel backend migration (live demo is DOWN)
+- **Priority:** P0 (the public demo is currently broken)
+- **Status:** Spec'd, ready for operator — `docs/vercel-migration-spec.md`
+- **Root cause:** Railway backend (`api-production-0eac`) has no active deployment (never-finished Railway retirement). Vercel frontend healthy; its proxy returns 404 because the upstream is gone.
+- **Decision:** Option A — port the existing FastAPI backend onto Vercel as a single Python function (Vercel Services, `experimentalServices`). **Amends launch-plan §1.1** (Edge-TS proxy rejected: `build_prompt` would fork the engine to TS; `/extract` PyMuPDF can't run on Edge).
+- **Supersedes the backend portion of B23** — BYOK is already implemented client-side (`sessionStorage df_api_key` + `api_key` in body), so this is a lift-and-shift, not a BYOK build. (B23's rate-limit + privacy-notice polish remain.)
+- **Owner-gated:** Vercel dashboard prep (Root Dir → repo root, Pro plan, Services beta, delete `RAILWAY_*` env vars) + Task-0 spike gate the deploy. Code tasks are operator-doable.
+- **Acceptance:** `/server/{templates,generate,extract}` work on Vercel with a BYOK key; Railway service stopped + token revoked; no `api_key` in logs. See spec §6.
+
 ## Completed
 
 ### B0: Template v2 upgrade
