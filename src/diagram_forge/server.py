@@ -48,6 +48,31 @@ def _serialize(value: Any) -> Any:
     return value
 
 
+def _reject_relative_output_path(output_path: str | None) -> dict | None:
+    """Return an error response dict if output_path is a relative path, else None.
+
+    A relative path would resolve against this server's own working directory rather
+    than the caller's repo, silently misplacing the file (reported 2026-07-16). A
+    stdio MCP server cannot see the caller's cwd, so relative paths are rejected
+    loudly instead of guessed at. Absolute paths (including ``~``-prefixed, which
+    ``expanduser`` makes absolute) and None pass through unchanged.
+    """
+    if output_path:
+        p = Path(output_path).expanduser()
+        if not p.is_absolute():
+            return {
+                "status": "error",
+                "error": (
+                    f"output_path must be an absolute path; got relative path "
+                    f"'{output_path}'. A relative path resolves against the diagram-forge "
+                    f"server's own working directory, not your repo, so the file would be "
+                    f"silently written to the wrong location. Pass an absolute path "
+                    f"(for example /Users/you/repo/docs/diagram.png)."
+                ),
+            }
+    return None
+
+
 def create_server(config_path: str | None = None) -> Any:
     """Create and configure the Diagram Forge MCP server."""
     try:
@@ -167,6 +192,12 @@ def create_server(config_path: str | None = None) -> Any:
                 "status": "error",
                 "error": f"Invalid theme '{theme}'. Use 'light' (default) or 'dark'.",
             }
+
+        # Reject a relative output_path early — before any provider/API call — so a
+        # misplaced-file failure is loud and cheap rather than silent and paid-for.
+        err = _reject_relative_output_path(output_path)
+        if err:
+            return err
 
         # Build the full prompt from template + user prompt (global tokens injected automatically)
         full_prompt = build_prompt(
@@ -294,6 +325,12 @@ def create_server(config_path: str | None = None) -> Any:
             output_path: Where to save the result
         """
         start = time.monotonic()
+
+        # Reject a relative output_path early — before any provider/API call — so a
+        # misplaced-file failure is loud and cheap rather than silent and paid-for.
+        err = _reject_relative_output_path(output_path)
+        if err:
+            return err
 
         # Load input image
         img_path = Path(image_path).expanduser()
