@@ -19,6 +19,7 @@ from unittest.mock import patch
 
 import pytest
 
+from diagram_forge.cost_tracker import CostTracker
 from diagram_forge.models import BillingModel, GenerationResult
 from diagram_forge.server import create_server
 
@@ -61,7 +62,17 @@ def _unwrap(raw):
 
 
 async def _generate(failures: dict[str, GenerationResult], provider: str, tmp_path):
-    app = create_server()
+    """Run generate_diagram against stub providers and an isolated cost database.
+
+    CostTracker is redirected at tmp_path. The generation path records every attempt,
+    so without this a test run writes fabricated rows — successes, and costs that were
+    never charged — into the real usage ledger at ~/.diagram-forge/usage.db. That
+    happened once while this fix was being written; the rows had to be deleted by hand.
+    """
+    with patch("diagram_forge.server.CostTracker") as tracker_cls:
+        tracker_cls.return_value = CostTracker(tmp_path / "usage.db")
+        app = create_server()
+
     with patch("diagram_forge.server.get_provider", _StubProviderFactory(failures)):
         return _unwrap(
             await app.call_tool(
