@@ -161,6 +161,10 @@ def create_server(config_path: str | None = None) -> Any:
         """
         start = time.monotonic()
 
+        # What the caller actually asked for, captured before template resolution rewrites
+        # `provider`. Reported back so a substitution is always visible in the response.
+        requested_provider = provider
+
         # Auto-select provider / model / quality from template recommendation.
         # `quality="auto"` means "no caller override" — let the template decide.
         if provider == "auto" or quality == "auto":
@@ -238,16 +242,23 @@ def create_server(config_path: str | None = None) -> Any:
             style_reference_path=style_path,
         )
 
-        # Try each provider in the fallback chain
+        # Try each provider in the fallback chain.
+        # Every candidate that does not produce the image is recorded, so a caller can never
+        # be handed a successful-looking result from a provider it did not ask for without
+        # also being told which provider failed and why. A silent substitution is
+        # indistinguishable from the requested provider working.
         result = None
         effective_provider = None
         effective_model = None
+        attempts: list[dict] = []
         for candidate in candidates:
             provider_config = config.providers.get(candidate)
             if not provider_config or not provider_config.enabled:
+                attempts.append({"provider": candidate, "skipped": "disabled or not configured"})
                 continue
             api_key = resolve_api_key(provider_config)
             if not api_key:
+                attempts.append({"provider": candidate, "skipped": "no API key resolved"})
                 continue
             candidate_model = model if (candidate == candidates[0] and model) else provider_config.model
             img_provider = get_provider(candidate, api_key, model=candidate_model)
@@ -274,9 +285,21 @@ def create_server(config_path: str | None = None) -> Any:
             )
             if result.success:
                 break
+            attempts.append(
+                {
+                    "provider": candidate,
+                    "model": candidate_model,
+                    "error": result.error_message,
+                }
+            )
 
         if result is None:
-            return {"status": "error", "error": "No providers configured or API keys missing"}
+            return {
+                "status": "error",
+                "error": "No providers configured or API keys missing",
+                "requested_provider": requested_provider,
+                "attempts": attempts,
+            }
 
         elapsed_ms = int((time.monotonic() - start) * 1000)
 
@@ -299,6 +322,16 @@ def create_server(config_path: str | None = None) -> Any:
         response = _serialize(result)
         response["status"] = "success" if result.success else "error"
         response["provider_used"] = effective_provider
+        response["requested_provider"] = requested_provider
+        # A fallback that hides the substitution is worse than one that fails: the caller
+        # believes it got what it asked for. Say so in the payload, not only in the log.
+        if attempts:
+            response["fell_back_from"] = attempts
+            if result.success and effective_provider != attempts[0].get("provider"):
+                response["warning"] = (
+                    f"Requested provider '{requested_provider}' did not produce this image. "
+                    f"Generated with '{effective_provider}' instead. See fell_back_from."
+                )
         if saved_path:
             response["output_path"] = saved_path
         return response
