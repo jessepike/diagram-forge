@@ -19,7 +19,9 @@ class TestLoadConfig:
         config = load_config()
         assert isinstance(config, AppConfig)
         assert config.version == 1
-        assert config.default_provider == ProviderName.GEMINI
+        # Default flipped to OpenAI in 9cd9b44 (2026-05-06); this assertion tracks
+        # config/default_config.yaml, which is the thing callers actually get.
+        assert config.default_provider == ProviderName.OPENAI
 
     def test_load_config_has_providers(self):
         """Default config should have all three providers."""
